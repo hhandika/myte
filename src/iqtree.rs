@@ -12,7 +12,7 @@ pub fn build_gene_trees_all(path: &str, version: i8) {
     let paths = genes.get_paths();
     println!("All paths: ");
     paths.iter().for_each(|path| {
-        let prefix = path.file_name().unwrap().to_string_lossy();
+        let prefix = path.file_stem().unwrap().to_string_lossy();
         let mut iqtree = Iqtree::new(version, path, &prefix);
         iqtree.run_iqtree();
     });
