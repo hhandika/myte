@@ -8,12 +8,14 @@ use glob::glob;
 use spinners::{Spinner, Spinners};
 
 pub fn build_gene_trees_all(path: &str, version: i8) {
+    let treedir = Path::new("treefiles");
     let mut genes = Genes::new(path);
     let paths = genes.get_paths();
+    genes.create_tree_files_dir(&treedir);
     println!("All paths: ");
     paths.iter().for_each(|path| {
         let prefix = path.file_stem().unwrap().to_string_lossy();
-        let mut iqtree = Iqtree::new(version, path, &prefix);
+        let mut iqtree = Iqtree::new(version, path, &prefix, &treedir);
         iqtree.run_iqtree();
     });
 }
@@ -37,6 +39,10 @@ impl Genes {
         let pattern = format!("{}/*.nexus", self.path);
         self.get_files(&pattern)
     }
+
+    fn create_tree_files_dir(&mut self, treedir: &Path) {
+        fs::create_dir_all(treedir).expect("CANNOT CREATE DIRECTORY FOR TREE FILES");
+    }
 }
 
 trait Files {
@@ -53,14 +59,16 @@ struct Iqtree<'a> {
     path: &'a Path,
     prefix: &'a str,
     command: String,
+    treedir: &'a Path,
 }
 
 impl<'a> Iqtree<'a> {
-    fn new(version: i8, path: &'a Path, prefix: &'a str) -> Self {
+    fn new(version: i8, path: &'a Path, prefix: &'a str, treedir: &'a Path) -> Self {
         Self {
             version,
             path,
             prefix,
+            treedir,
             command: String::from("iqtree"),
         }
     }
@@ -123,8 +131,14 @@ impl<'a> Iqtree<'a> {
         let dir = Path::new(self.prefix);
         fs::create_dir_all(dir)?;
         files.iter().for_each(|file| {
-            let outdir = dir.join(file);
-            fs::rename(file, outdir).expect("CANNOT MOVE IQ-TREE RESULT FILES");
+            let ext = file.extension().unwrap().to_string_lossy();
+            if ext == "treefile" {
+                let outdir = self.treedir.join(file);
+                fs::rename(file, outdir).expect("CANNOT MOVE IQ-TREE'S TREE FILE");
+            } else {
+                let outdir = dir.join(file);
+                fs::rename(file, outdir).expect("CANNOT MOVE IQ-TREE'S RESULT FILES");
+            }
         });
 
         Ok(())
@@ -148,7 +162,8 @@ mod test {
     fn get_iqtree_version_test() {
         let version = 2;
         let path = Path::new(".");
-        let mut iqtree = Iqtree::new(version, path, "loci");
+        let trees = Path::new(".");
+        let mut iqtree = Iqtree::new(version, path, "loci", trees);
         iqtree.get_iqtree_version();
         assert_eq!("iqtree2", iqtree.command);
     }
