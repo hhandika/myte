@@ -85,8 +85,9 @@ impl<'a> Iqtree<'a> {
     }
 
     fn set_spinner(&mut self) -> Spinner {
-        let msg = "IQ-TREE is processing...\t".to_string();
-        Spinner::new(Spinners::Moon, msg)
+        let msg = format!("IQ-TREE is processing {}...\t", self.prefix);
+        let spin_msg = msg.to_string();
+        Spinner::new(Spinners::Moon, spin_msg)
     }
 
     fn print_done(&self) {
