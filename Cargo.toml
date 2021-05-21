@@ -8,5 +8,5 @@ edition = "2018"
 
 [dependencies]
 clap = "2.33.*"
-# walkdir = "2.3.*"
-glob = "0.3.0"
+spinners = "1.2.*"
+glob = "0.3.*"
