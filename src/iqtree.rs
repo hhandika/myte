@@ -12,12 +12,22 @@ pub fn build_gene_trees_all(path: &str, version: i8) {
     let mut genes = Genes::new(path);
     let paths = genes.get_paths();
     genes.create_tree_files_dir(&treedir);
-    println!("All paths: ");
+    print_genes_paths(&paths);
     paths.iter().for_each(|path| {
         let prefix = path.file_stem().unwrap().to_string_lossy();
         let mut iqtree = Iqtree::new(version, path, &prefix, &treedir);
         iqtree.run_iqtree();
     });
+}
+
+fn print_genes_paths(paths: &[PathBuf]) {
+    let stdout = io::stdout();
+    let mut handle = stdout.lock();
+    writeln!(handle, "\x1b[0;45mAll alignment: \x1b[0m").unwrap();
+
+    paths
+        .iter()
+        .for_each(|path| writeln!(handle, "{}", path.to_string_lossy()).unwrap());
 }
 
 impl Files for Genes {}
