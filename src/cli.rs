@@ -36,5 +36,5 @@ pub fn parse_cli(version: &str) {
 fn parse_gene_cli(matches: &ArgMatches) {
     let path = matches.value_of("dir").expect("CANNOT GET DIRECTORY PATH");
     let version = 2;
-    iqtree::build_gene_trees_all(path, version);
+    iqtree::build_gene_trees(path, version);
 }
