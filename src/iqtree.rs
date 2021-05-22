@@ -102,9 +102,12 @@ impl<'a> GeneTrees<'a> {
         let file = File::create(&fname).expect("CANNOT CREATE AN ALL GENE TREE FILE");
         let mut treefile = LineWriter::new(file);
         let txt = format!("Combining {} gene trees into a single file...", trees.len());
+        let spin = self.set_spinner(&txt);
         trees
             .iter()
             .for_each(|tree| self.write_trees(&mut treefile, tree));
+        spin.stop();
+        self.print_done();
     }
 
     fn write_trees<W: Write>(&self, treefile: &mut W, tree_path: &Path) {
@@ -165,6 +168,11 @@ impl<'a> Iqtree<'a> {
     fn check_iqtree_success(&self, out: &Output) {
         if !out.status.success() {
             println!();
+            let msg = format!(
+                "\x1b[0;41mIQ-TREE FAILED TO PROCESS {}\x1b[0m",
+                self.path.to_string_lossy()
+            );
+            io::stdout().write(msg.as_bytes()).unwrap();
             io::stdout().write_all(&out.stdout).unwrap();
             io::stdout().write_all(&out.stderr).unwrap();
         }
