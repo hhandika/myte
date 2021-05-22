@@ -16,12 +16,12 @@ jobs:
         include:
           - name: linux
             os: ubuntu-latest
-            artifact_name: target/release/yap
+            artifact_name: target/release/myte
             asset_name: myte-Linux-WindowsWSL-x86_64
 
           - name: macos
             os: macos-latest
-            artifact_name: target/release/yap
+            artifact_name: target/release/myte
             asset_name: myte-MacOS-x86_64
 
     steps:
