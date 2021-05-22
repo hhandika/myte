@@ -13,10 +13,10 @@ Estimate species tree, gene trees, gene concordance factor, site concordance fac
 myte auto -d [gene-alignment-folder]
 ```
 
-Future goal:
+Future goals:
 
 1. Incorporate multi-species coalescence analyses in the pipeline.
-2. Other tools useful for tree building.
+2. Other tools useful for genomics tree estimation.
 
 ## Installation
 
@@ -68,5 +68,3 @@ myte gene -d [alignment-folder]
 
 1. Allow costum parameters for IQ-TREE.
 2. Working auto commands.
-
-More feature coming soon...
