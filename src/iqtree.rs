@@ -81,7 +81,7 @@ impl<'a> Genes<'a> {
             let mut tree = File::open(t).expect("CANNOT ACCESS TREE FILE");
             tree.read_to_string(&mut content)
                 .expect("CANNOT READ TREE FILES");
-            writeln!(treefiles, "{}", content).unwrap();
+            writeln!(treefiles, "{}", content.trim()).unwrap();
         });
     }
 }
