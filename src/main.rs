@@ -10,5 +10,5 @@ fn main() {
     cli::parse_cli(version);
     let duration = time.elapsed();
 
-    println!("Execution time: {:?}", duration);
+    println!("\nExecution time: {:?}", duration);
 }

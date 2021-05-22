@@ -5,6 +5,7 @@ use std::process::{Command, Output};
 use std::str;
 
 use glob::glob;
+use rayon::prelude::*;
 use spinners::{Spinner, Spinners};
 
 pub fn build_gene_trees_all(path: &str, version: i8) {
@@ -12,22 +13,28 @@ pub fn build_gene_trees_all(path: &str, version: i8) {
     let mut genes = Genes::new(path);
     let paths = genes.get_paths();
     genes.create_tree_files_dir(&treedir);
-    print_genes_paths(&paths);
-    paths.iter().for_each(|path| {
+    print_genes_paths(&paths).unwrap();
+    let spin = genes.set_spinner();
+    paths.par_iter().for_each(|path| {
         let prefix = path.file_stem().unwrap().to_string_lossy();
         let mut iqtree = Iqtree::new(version, path, &prefix, &treedir);
         iqtree.run_iqtree();
     });
+    spin.stop();
+    genes.print_done();
 }
 
-fn print_genes_paths(paths: &[PathBuf]) {
+fn print_genes_paths(paths: &[PathBuf]) -> Result<()> {
     let stdout = io::stdout();
     let mut handle = stdout.lock();
-    writeln!(handle, "\x1b[0;45mAll alignment: \x1b[0m").unwrap();
+    writeln!(handle, "\x1b[0;45mAll alignment: \x1b[0m")?;
 
     paths
         .iter()
         .for_each(|path| writeln!(handle, "{}", path.to_string_lossy()).unwrap());
+    writeln!(handle)?;
+
+    Ok(())
 }
 
 impl Files for Genes {}
@@ -53,6 +60,11 @@ impl Genes {
     fn create_tree_files_dir(&mut self, treedir: &Path) {
         fs::create_dir_all(treedir).expect("CANNOT CREATE DIRECTORY FOR TREE FILES");
     }
+
+    fn set_spinner(&mut self) -> Spinner {
+        let msg = "IQ-TREE is processing {}...\t".to_string();
+        Spinner::new(Spinners::Moon, msg)
+    }
 }
 
 trait Files {
@@ -61,6 +73,12 @@ trait Files {
             .expect("COULD NOT FIND FILES")
             .filter_map(|ok| ok.ok())
             .collect()
+    }
+
+    fn print_done(&self) {
+        let stdout = io::stdout();
+        let mut handle = stdout.lock();
+        writeln!(handle, "\x1b[0;32mDONE!\x1b[0m").unwrap();
     }
 }
 
@@ -85,25 +103,10 @@ impl<'a> Iqtree<'a> {
 
     fn run_iqtree(&mut self) {
         self.get_iqtree_version();
-        let spin = self.set_spinner();
         let out = self.call_iqtree();
         self.check_iqtree_success(&out);
         let files = self.get_result_files();
         self.move_result_files(&files).unwrap();
-        spin.stop();
-        self.print_done();
-    }
-
-    fn set_spinner(&mut self) -> Spinner {
-        let msg = format!("IQ-TREE is processing {}...\t", self.prefix);
-        let spin_msg = msg.to_string();
-        Spinner::new(Spinners::Moon, spin_msg)
-    }
-
-    fn print_done(&self) {
-        let stdout = io::stdout();
-        let mut handle = stdout.lock();
-        writeln!(handle, "\x1b[0;32mDONE!\x1b[0m").unwrap();
     }
 
     // Build gen tree using IQ-TREE
