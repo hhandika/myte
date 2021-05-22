@@ -39,6 +39,21 @@ fn print_genes_paths(paths: &[PathBuf]) -> Result<()> {
     Ok(())
 }
 
+trait Files {
+    fn get_files(&mut self, pattern: &str) -> Vec<PathBuf> {
+        glob(pattern)
+            .expect("COULD NOT FIND FILES")
+            .filter_map(|ok| ok.ok())
+            .collect()
+    }
+
+    fn print_done(&self) {
+        let stdout = io::stdout();
+        let mut handle = stdout.lock();
+        writeln!(handle, "\x1b[0;32mDONE!\x1b[0m").unwrap();
+    }
+}
+
 impl Files for Genes<'_> {}
 impl Files for Iqtree<'_> {}
 
@@ -83,21 +98,6 @@ impl<'a> Genes<'a> {
                 .expect("CANNOT READ TREE FILES");
             writeln!(treefiles, "{}", content.trim()).unwrap();
         });
-    }
-}
-
-trait Files {
-    fn get_files(&mut self, pattern: &str) -> Vec<PathBuf> {
-        glob(pattern)
-            .expect("COULD NOT FIND FILES")
-            .filter_map(|ok| ok.ok())
-            .collect()
-    }
-
-    fn print_done(&self) {
-        let stdout = io::stdout();
-        let mut handle = stdout.lock();
-        writeln!(handle, "\x1b[0;32mDONE!\x1b[0m").unwrap();
     }
 }
 
