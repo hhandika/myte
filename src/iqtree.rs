@@ -69,7 +69,7 @@ impl<'a> GeneTrees<'a> {
     fn print_genes_paths(&self, paths: &[PathBuf]) -> Result<()> {
         let stdout = io::stdout();
         let mut handle = stdout.lock();
-        writeln!(handle, "\x1b[0;45mAll alignment: \x1b[0m")?;
+        writeln!(handle, "\x1b[0;46mAlignment path: \x1b[0m")?;
 
         paths
             .iter()
@@ -146,11 +146,11 @@ impl<'a> Iqtree<'a> {
     fn call_iqtree(&mut self) -> Output {
         let mut out = Command::new(self.command.clone());
         out.arg("-s")
-            .arg(self.path)
+            .arg(&self.path)
             .arg("-T")
             .arg("AUTO")
             .arg("--prefix")
-            .arg(self.prefix.clone())
+            .arg(&self.prefix)
             .output()
             .expect("FAILED TO RUN IQ-TREE")
     }
