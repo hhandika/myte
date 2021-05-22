@@ -15,7 +15,7 @@ pub fn build_gene_trees(path: &str, version: i8) {
     let paths = genes.get_alignment_paths();
     genes.create_tree_files_dir(&treedir);
     genes.print_genes_paths(&paths).unwrap();
-    let spin = genes.set_spinner();
+    let spin = genes.set_spinner(paths.len());
     genes.par_process_gene_trees(&paths);
     spin.stop();
     genes.combine_gene_trees();
@@ -30,8 +30,9 @@ trait Commons {
             .collect()
     }
 
-    fn set_spinner(&mut self) -> Spinner {
-        let msg = "IQ-TREE is processing {}...\t".to_string();
+    fn set_spinner(&mut self, counts: usize) -> Spinner {
+        let txt = format!("IQ-TREE is processing {} alignments...\t", counts);
+        let msg = txt.to_string();
         Spinner::new(Spinners::Moon, msg)
     }
 
@@ -75,7 +76,6 @@ impl<'a> GeneTrees<'a> {
             .iter()
             .for_each(|path| writeln!(handle, "{}", path.to_string_lossy()).unwrap());
         writeln!(handle)?;
-
         Ok(())
     }
 
@@ -96,6 +96,7 @@ impl<'a> GeneTrees<'a> {
     }
 
     fn combine_gene_trees(&mut self) {
+        println!("Combining gene trees into a single file...");
         let pattern = format!("{}/*.treefile", self.treedir.to_string_lossy());
         let trees = self.get_files(&pattern);
         let fname = "all_genes.treefiles";
