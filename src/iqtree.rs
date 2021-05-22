@@ -175,8 +175,8 @@ impl<'a> Iqtree<'a> {
     }
 
     fn move_result_files(&mut self, files: &[PathBuf]) -> Result<()> {
-        let path = Path::new("iqtree-genes");
-        let dir = Path::new(&path.join(self.prefix));
+        let path = Path::new("iqtree-genes").join(self.prefix);
+        let dir = Path::new(&path);
         fs::create_dir_all(dir)?;
         files.iter().for_each(|file| {
             let ext = file.extension().unwrap().to_string_lossy();
