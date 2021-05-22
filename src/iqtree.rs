@@ -175,6 +175,10 @@ impl<'a> Iqtree<'a> {
             io::stdout().write(msg.as_bytes()).unwrap();
             io::stdout().write_all(&out.stdout).unwrap();
             io::stdout().write_all(&out.stderr).unwrap();
+            eprintln!(
+                "\x1b[0;41mERROR:\x1b[0m IQ-TREE failed to process {}. See the log output above.",
+                self.path.to_string_lossy()
+            );
         }
     }
 
