@@ -20,7 +20,7 @@ Future goal:
 
 ## Installation
 
-`myte` is a single executable command line app. The executable file will be available in the release [link](https://github.com/hhandika/myte/releases). Copy it the folder that registered in your path variable.
+`myte` is a single executable command line app. The executable file will be available in the release [link](https://github.com/hhandika/myte/releases). Copy it the folder that is registered in your PATH variable.
 
 __Comments__: I will update this instruction once the program has complete planned features.
 
@@ -46,7 +46,7 @@ cd myte
 cargo build --release
 ```
 
-Your executable will be available at `/target/release/myte`. Copy it the folder that is registered in your environmental variable.
+Your executable will be available at `/target/release/myte`. Copy it the folder that is registered in your PATH variable.
 
 __Notes__: The program may failed to run in outdated HPC OS due to GLIBC errors. The solution is to compile it to fully static binary using `musl` compiler. See instruction [here](https://doc.rust-lang.org/edition-guide/rust-2018/platform-and-target-support/musl-support-for-fully-static-binaries.html). Then, to build the binary `cargo build --release --target x86_64-unknown-linux-musl
 
@@ -56,7 +56,7 @@ The code is still at infancy. Working features:
 
 ### Build gene trees from a directory of gene alignments
 
-The program will create multiple instances of IQ-TREE to run gene trees estimation in parallel. The program assess available cpu resources in your system and does it sensibly. In a simple word, it won't slow down your computer despite using all your cpu cores. Hence, it can be used on a personal computers without problems.
+The program will create multiple instances of IQ-TREE to run gene tree estimation in parallel. The program assess available cpu resources in your system and does it sensibly. In a simple word, it won't slow down your computer despite using all your cpu cores. Hence, it can be used on a personal computers without problems.
 
 To generate gene trees:
 
@@ -68,3 +68,5 @@ myte gene -d [alignment-folder]
 
 1. Allow costum parameters for IQ-TREE.
 2. Working auto commands.
+
+More feature coming soon...
