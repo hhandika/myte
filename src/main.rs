@@ -10,9 +10,6 @@ fn main() {
     let time = Instant::now();
     cli::parse_cli(version);
     let duration = time.elapsed();
-
-    println!("\nExecution time: {:?}", duration);
-
     if duration.as_secs() < 60 {
         println!("Execution time: {:?}", duration);
     } else {
