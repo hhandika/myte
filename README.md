@@ -56,7 +56,7 @@ The code is still at infancy. Working features:
 
 ### Build gene trees from a directory of gene alignments
 
-The program will create multiple instances of IQ-TREE to run gene tree estimation in parallel. The program assess available cpu resources in your system and does it sensibly. In a simple word, it won't slow down your computer despite using all your cpu cores. Hence, it can be used on a personal computers without problems.
+The program will create multiple instances of IQ-TREE to run gene tree estimation in parallel. The program assess available cpu resources in your system and does it sensibly. In a simple word, it won't slow down your computer despite using all your cpu cores. Hence, it can be used on a personal computer without interferring your other work.
 
 To generate gene trees:
 
