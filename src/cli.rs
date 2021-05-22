@@ -21,12 +21,25 @@ fn get_args(version: &str) -> ArgMatches {
                         .value_name("DIR"),
                 ),
         )
+        .subcommand(
+            App::new("auto")
+                .about("Species and gene trees and gene and site concordance factors")
+                .arg(
+                    Arg::with_name("dir")
+                        .short("d")
+                        .long("dir")
+                        .help("Inputs folder path to locus alignment")
+                        .takes_value(true)
+                        .value_name("DIR"),
+                ),
+        )
         .get_matches()
 }
 
 pub fn parse_cli(version: &str) {
     let args = get_args(version);
     match args.subcommand() {
+        ("auto", Some(_)) => println!("AUTO COMMANDS"),
         ("check", Some(_)) => println!("It's check dependencies"),
         ("gene", Some(gene_matches)) => parse_gene_cli(gene_matches),
         _ => unreachable!(),
