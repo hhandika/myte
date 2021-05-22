@@ -20,7 +20,7 @@ pub fn build_gene_trees(path: &str, version: i8) {
     genes.par_process_gene_trees(&paths);
     spin.stop();
     genes.combine_gene_trees();
-    genes.print_done();
+    println!("\nCOMPLETED!\n");
 }
 
 trait Commons {
