@@ -1,5 +1,6 @@
 use std::fs;
-use std::io::{self, Result, Write};
+use std::fs::File;
+use std::io::{self, LineWriter, Read, Result, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 use std::str;
@@ -10,7 +11,7 @@ use spinners::{Spinner, Spinners};
 
 pub fn build_gene_trees_all(path: &str, version: i8) {
     let treedir = Path::new("treefiles");
-    let mut genes = Genes::new(path);
+    let mut genes = Genes::new(path, treedir);
     let paths = genes.get_paths();
     genes.create_tree_files_dir(&treedir);
     print_genes_paths(&paths).unwrap();
@@ -21,6 +22,7 @@ pub fn build_gene_trees_all(path: &str, version: i8) {
         iqtree.run_iqtree();
     });
     spin.stop();
+    genes.create_gene_treeset();
     genes.print_done();
 }
 
@@ -37,17 +39,19 @@ fn print_genes_paths(paths: &[PathBuf]) -> Result<()> {
     Ok(())
 }
 
-impl Files for Genes {}
+impl Files for Genes<'_> {}
 impl Files for Iqtree<'_> {}
 
-struct Genes {
+struct Genes<'a> {
     path: String,
+    treedir: &'a Path,
 }
 
-impl Genes {
-    fn new(path: &str) -> Self {
+impl<'a> Genes<'a> {
+    fn new(path: &str, treedir: &'a Path) -> Self {
         Self {
             path: String::from(path),
+            treedir,
         }
     }
 
@@ -64,6 +68,21 @@ impl Genes {
     fn set_spinner(&mut self) -> Spinner {
         let msg = "IQ-TREE is processing {}...\t".to_string();
         Spinner::new(Spinners::Moon, msg)
+    }
+
+    fn create_gene_treeset(&mut self) {
+        let pattern = format!("{}/*.treefile", self.treedir.to_string_lossy());
+        let trees = self.get_files(&pattern);
+        let fname = "all_genes.treefiles";
+        let file = File::create(&fname).expect("CANNOT CREATE AN ALL GENE TREE FILE");
+        let mut treefiles = LineWriter::new(file);
+        trees.iter().for_each(|t| {
+            let mut content = String::new();
+            let mut tree = File::open(t).expect("CANNOT ACCESS TREE FILE");
+            tree.read_to_string(&mut content)
+                .expect("CANNOT READ TREE FILES");
+            writeln!(treefiles, "{}", content).unwrap();
+        });
     }
 }
 
@@ -166,7 +185,8 @@ mod test {
     #[test]
     fn get_gene_paths_test() {
         let path = "test_files";
-        let mut genes = Genes::new(path);
+        let treefiles = Path::new(".");
+        let mut genes = Genes::new(path, treefiles);
         let gene_paths = genes.get_paths();
 
         assert_eq!(2, gene_paths.len());
