@@ -36,7 +36,7 @@ pub fn estimate_concordance_factor(path: &str, version: i8) {
     let dir_path = Path::new(path);
     let treedir = Path::new("iqtree-CF");
     let mut iqtree = Iqtree::new(version, &dir_path, prefix, treedir);
-    iqtree.run_iqtree_species_tree();
+    iqtree.run_iqtree_concordance();
 }
 
 trait Commons {
