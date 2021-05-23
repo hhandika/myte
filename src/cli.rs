@@ -46,12 +46,6 @@ pub fn parse_cli(version: &str) {
     }
 }
 
-fn parse_gene_cli(matches: &ArgMatches) {
-    let path = get_path(matches);
-    let version = 2;
-    iqtree::build_gene_trees(path, version);
-}
-
 fn parse_auto_cli(matches: &ArgMatches) {
     let path = get_path(matches);
     let version = 2;
@@ -59,6 +53,13 @@ fn parse_auto_cli(matches: &ArgMatches) {
     iqtree::build_gene_trees(path, version);
     iqtree::estimate_concordance_factor(path, version);
     println!("DONE!");
+}
+
+fn parse_gene_cli(matches: &ArgMatches) {
+    let path = get_path(matches);
+    let version = 2;
+    iqtree::build_gene_trees(path, version);
+    println!("\nCOMPLETED!\n");
 }
 
 fn get_path<'a>(matches: &'a ArgMatches) -> &'a str {

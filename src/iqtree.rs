@@ -22,7 +22,6 @@ pub fn build_gene_trees(path: &str, version: i8) {
     spin.stop();
     genes.print_done();
     genes.combine_gene_trees();
-    println!("\nCOMPLETED!\n");
 }
 
 pub fn build_species_tree(path: &str, version: i8) {
