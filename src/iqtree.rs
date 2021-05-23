@@ -6,6 +6,7 @@ use std::process::{Command, Output};
 use std::str;
 
 use glob::glob;
+use num_cpus;
 use rayon::prelude::*;
 use spinners::{Spinner, Spinners};
 
@@ -19,6 +20,7 @@ pub fn build_gene_trees(path: &str, version: i8) {
     let spin = genes.set_spinner(&msg);
     genes.par_process_gene_trees(&paths);
     spin.stop();
+    genes.print_done();
     genes.combine_gene_trees();
     println!("\nCOMPLETED!\n");
 }
@@ -28,7 +30,11 @@ pub fn build_species_tree(path: &str, version: i8) {
     let dir_path = Path::new(path);
     let treedir = Path::new("iqtree-species-tree");
     let mut iqtree = Iqtree::new(version, &dir_path, prefix, treedir);
+    let msg = format!("IQ-TREE is processing species tree for {}...\t", path);
+    let spin = iqtree.set_spinner(&msg);
     iqtree.run_iqtree_species_tree();
+    spin.stop();
+    iqtree.print_done();
 }
 
 pub fn estimate_concordance_factor(path: &str, version: i8) {
@@ -36,7 +42,11 @@ pub fn estimate_concordance_factor(path: &str, version: i8) {
     let dir_path = Path::new(path);
     let treedir = Path::new("iqtree-CF");
     let mut iqtree = Iqtree::new(version, &dir_path, prefix, treedir);
+    let msg = format!("IQ-TREE is processing concordance factor...\t");
+    let spin = iqtree.set_spinner(&msg);
     iqtree.run_iqtree_concordance();
+    spin.stop();
+    iqtree.print_done();
 }
 
 trait Commons {
@@ -197,11 +207,12 @@ impl<'a> Iqtree<'a> {
 
     fn run_iqtree_concordance(&mut self) {
         self.get_iqtree_version();
-        let out = self.call_iqtree_concordance();
+        let cores = num_cpus::get_physical();
+        let out = self.call_iqtree_concordance(cores);
         self.check_iqtree_success(&out);
     }
 
-    fn call_iqtree_concordance(&mut self) -> Output {
+    fn call_iqtree_concordance(&mut self, num_core: i16) -> Output {
         let mut out = Command::new(&self.command);
         out.arg("-t")
             .arg("concat.treefile")
@@ -212,7 +223,7 @@ impl<'a> Iqtree<'a> {
             .arg("--scf")
             .arg("100")
             .arg("-T")
-            .arg("AUTO")
+            .arg(num_core.to_string())
             .arg("--prefix")
             .arg(&self.prefix)
             .output()
