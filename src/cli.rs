@@ -57,6 +57,8 @@ fn parse_auto_cli(matches: &ArgMatches) {
     let version = 2;
     iqtree::build_species_tree(path, version);
     iqtree::build_gene_trees(path, version);
+    iqtree::estimate_concordance_factor(path, version);
+    println!("DONE!");
 }
 
 fn get_path<'a>(matches: &'a ArgMatches) -> &'a str {

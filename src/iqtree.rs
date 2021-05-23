@@ -31,6 +31,14 @@ pub fn build_species_tree(path: &str, version: i8) {
     iqtree.run_iqtree_species_tree();
 }
 
+pub fn estimate_concordance_factor(path: &str, version: i8) {
+    let prefix = "concord";
+    let dir_path = Path::new(path);
+    let treedir = Path::new("iqtree-CF");
+    let mut iqtree = Iqtree::new(version, &dir_path, prefix, treedir);
+    iqtree.run_iqtree_species_tree();
+}
+
 trait Commons {
     fn get_files(&mut self, pattern: &str) -> Vec<PathBuf> {
         glob(pattern)
@@ -179,6 +187,30 @@ impl<'a> Iqtree<'a> {
         let mut out = Command::new(&self.command);
         out.arg("-s")
             .arg(&self.path)
+            .arg("-T")
+            .arg("AUTO")
+            .arg("--prefix")
+            .arg(&self.prefix)
+            .output()
+            .expect("FAILED TO RUN IQ-TREE")
+    }
+
+    fn run_iqtree_concordance(&mut self) {
+        self.get_iqtree_version();
+        let out = self.call_iqtree_concordance();
+        self.check_iqtree_success(&out);
+    }
+
+    fn call_iqtree_concordance(&mut self) -> Output {
+        let mut out = Command::new(&self.command);
+        out.arg("-t")
+            .arg("concat.treefile")
+            .arg("--gcf")
+            .arg("genes.treefiles")
+            .arg("-p")
+            .arg(&self.path)
+            .arg("--scf")
+            .arg("100")
             .arg("-T")
             .arg("AUTO")
             .arg("--prefix")
