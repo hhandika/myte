@@ -212,7 +212,7 @@ impl<'a> Iqtree<'a> {
         self.check_iqtree_success(&out);
     }
 
-    fn call_iqtree_concordance(&mut self, num_core: i16) -> Output {
+    fn call_iqtree_concordance(&mut self, num_core: usize) -> Output {
         let mut out = Command::new(&self.command);
         out.arg("-t")
             .arg("concat.treefile")
