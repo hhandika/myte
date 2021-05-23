@@ -16,11 +16,11 @@ myte auto -d [gene-alignment-folder]
 Future goals:
 
 1. Incorporate multi-species coalescence analyses in the pipeline.
-2. Other tools useful for genomic tree estimation. The goal is to take advantage Rust performance (identical to C/C++) to re-write typical genomic tasks that are inefficient to do in interpreted languages, such as Python, R, Perl, etc.
+2. Other tools useful for genomic tree estimation. The goal is to take advantage of Rust performance (identical to C/C++) to re-write typical genomic tasks that are inefficient to do in interpreted languages, such as Python, R, Perl, etc.
 
 ## Installation
 
-`myte` is a single executable command line app. The executable file will be available in the release [link](https://github.com/hhandika/myte/releases). Copy it the folder that is registered in your PATH variable.
+`myte` is a single executable command line app. The executable file will be available in the release [link](https://github.com/hhandika/myte/releases). Copy it to the folder that is registered in your PATH variable.
 
 __Comments__: I will update this instruction once the program has complete planned features.
 
@@ -30,7 +30,9 @@ OS support:
 2. Linux
 3. Windows-WSL
 
-Dependencies at runtime: [IQ-TREE](http://www.iqtree.org/)
+Dependencies: 
+
+1. [IQ-TREE](http://www.iqtree.org/)
 
 ### Compile from source
 
@@ -46,7 +48,7 @@ cd myte
 cargo build --release
 ```
 
-Your executable will be available at `/target/release/myte`. Copy it the folder that is registered in your PATH variable.
+Your executable will be available at `/target/release/myte`. Copy it to the folder that is registered in your PATH variable.
 
 __Notes__: The program may failed to run in outdated HPC OS due to GLIBC errors. The solution is to compile it to fully static binary using `musl` compiler. See instruction [here](https://doc.rust-lang.org/edition-guide/rust-2018/platform-and-target-support/musl-support-for-fully-static-binaries.html). Then, to build the binary `cargo build --release --target x86_64-unknown-linux-musl`
 
