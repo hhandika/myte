@@ -3,7 +3,7 @@
 ![myte-tests](https://github.com/hhandika/myte/workflows/myte-tests/badge.svg)
 [![Build Status](https://www.travis-ci.com/hhandika/myte.svg?branch=main)](https://www.travis-ci.com/hhandika/myte)
 
-Phylogenomics tools for tree building. The goal is to simplify phylogenomic tree building.
+A tool to simplify phylogemics data analyses.
 
 Current goal:
 
@@ -16,7 +16,7 @@ myte auto -d [gene-alignment-folder]
 Future goals:
 
 1. Incorporate multi-species coalescence analyses in the pipeline.
-2. Other tools useful for genomics tree estimation.
+2. Other tools useful for genomic tree estimation. The goal is to take advantage Rust performance (identical to C/C++) to re-write typical genomic tasks that are inefficient to do in interpreted languages, such as Python, R, Perl, etc.
 
 ## Installation
 
