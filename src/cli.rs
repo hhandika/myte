@@ -39,7 +39,7 @@ fn get_args(version: &str) -> ArgMatches {
 pub fn parse_cli(version: &str) {
     let args = get_args(version);
     match args.subcommand() {
-        ("auto", Some(_)) => println!("AUTO COMMANDS"),
+        ("auto", Some(auto_matches)) => parse_auto_cli(auto_matches),
         ("check", Some(_)) => println!("It's check dependencies"),
         ("gene", Some(gene_matches)) => parse_gene_cli(gene_matches),
         _ => unreachable!(),
@@ -47,7 +47,18 @@ pub fn parse_cli(version: &str) {
 }
 
 fn parse_gene_cli(matches: &ArgMatches) {
-    let path = matches.value_of("dir").expect("CANNOT GET DIRECTORY PATH");
+    let path = get_path(matches);
     let version = 2;
     iqtree::build_gene_trees(path, version);
+}
+
+fn parse_auto_cli(matches: &ArgMatches) {
+    let path = get_path(matches);
+    let version = 2;
+    iqtree::build_species_tree(path, version);
+    iqtree::build_gene_trees(path, version);
+}
+
+fn get_path<'a>(matches: &'a ArgMatches) -> &'a str {
+    matches.value_of("dir").expect("CANNOT GET DIRECTORY PATH")
 }
