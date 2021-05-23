@@ -54,6 +54,12 @@ __Notes__: The program may failed to run in outdated HPC OS due to GLIBC errors.
 
 The code is still at infancy. Working features:
 
+### Auto estimate species and gene trees and concordance factors
+
+```{Bash}
+myte auto -d [alignment-folder]
+```
+
 ### Build gene trees from a directory of gene alignments
 
 The program will create multiple instances of IQ-TREE to run gene tree estimation in parallel. The program assess available cpu resources in your system and does it sensibly. In a simple word, it won't slow down your computer despite using all your cpu cores. Hence, it can be used on a personal computer without interferring your other work.
@@ -67,4 +73,4 @@ myte gene -d [alignment-folder]
 ### Feature planned
 
 1. Allow costum parameters for IQ-TREE.
-2. Working auto commands.
+2. Neater terminal output.
