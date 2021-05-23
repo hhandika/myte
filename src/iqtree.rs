@@ -10,7 +10,7 @@ use rayon::prelude::*;
 use spinners::{Spinner, Spinners};
 
 pub fn build_gene_trees(path: &str, version: i8) {
-    let treedir = Path::new("treefiles");
+    let treedir = Path::new("gene-treefiles");
     let mut genes = GeneTrees::new(path, treedir, version);
     let paths = genes.get_alignment_paths();
     genes.create_tree_files_dir(&treedir);
@@ -21,6 +21,14 @@ pub fn build_gene_trees(path: &str, version: i8) {
     spin.stop();
     genes.combine_gene_trees();
     println!("\nCOMPLETED!\n");
+}
+
+pub fn build_species_tree(path: &str, version: i8) {
+    let prefix = "concat";
+    let dir_path = Path::new(path);
+    let treedir = Path::new("iqtree-species-tree");
+    let mut iqtree = Iqtree::new(version, &dir_path, prefix, treedir);
+    iqtree.run_iqtree_species_tree();
 }
 
 trait Commons {
@@ -86,10 +94,10 @@ impl<'a> GeneTrees<'a> {
     fn par_process_gene_trees(&mut self, paths: &[PathBuf]) {
         paths
             .par_iter()
-            .for_each(|path| self.generate_gene_trees(path));
+            .for_each(|path| self.estimate_gene_tree(path));
     }
 
-    fn generate_gene_trees(&self, path: &Path) {
+    fn estimate_gene_tree(&self, path: &Path) {
         let prefix = path.file_stem().unwrap().to_string_lossy();
         let mut iqtree = Iqtree::new(self.version, path, &prefix, &self.treedir);
         iqtree.run_iqtree_gene_tree();
@@ -138,17 +146,37 @@ impl<'a> Iqtree<'a> {
         }
     }
 
+    fn run_iqtree_species_tree(&mut self) {
+        self.get_iqtree_version();
+        let out = self.call_iqtree_species();
+        self.check_iqtree_success(&out);
+    }
+
+    fn call_iqtree_species(&mut self) -> Output {
+        let mut out = Command::new(&self.command);
+        out.arg("-p")
+            .arg(&self.path)
+            .arg("-B")
+            .arg("1000")
+            .arg("-T")
+            .arg("AUTO")
+            .arg("--prefix")
+            .arg(&self.prefix)
+            .output()
+            .expect("FAILED TO RUN IQ-TREE")
+    }
+
     fn run_iqtree_gene_tree(&mut self) {
         self.get_iqtree_version();
-        let out = self.call_iqtree();
+        let out = self.call_iqtree_gene();
         self.check_iqtree_success(&out);
-        let files = self.get_result_files();
-        self.move_result_files(&files).unwrap();
+        let files = self.get_iqtree_gene_files();
+        self.move_iqtree_gene_files(&files).unwrap();
     }
 
     // Build gen tree using IQ-TREE
-    fn call_iqtree(&mut self) -> Output {
-        let mut out = Command::new(self.command.clone());
+    fn call_iqtree_gene(&mut self) -> Output {
+        let mut out = Command::new(&self.command);
         out.arg("-s")
             .arg(&self.path)
             .arg("-T")
@@ -182,12 +210,12 @@ impl<'a> Iqtree<'a> {
         }
     }
 
-    fn get_result_files(&mut self) -> Vec<PathBuf> {
+    fn get_iqtree_gene_files(&mut self) -> Vec<PathBuf> {
         let pattern = format!("{}.*", self.prefix);
         self.get_files(&pattern)
     }
 
-    fn move_result_files(&mut self, files: &[PathBuf]) -> Result<()> {
+    fn move_iqtree_gene_files(&mut self, files: &[PathBuf]) -> Result<()> {
         let path = Path::new("iqtree-genes").join(self.prefix);
         let dir = Path::new(&path);
         fs::create_dir_all(dir)?;
