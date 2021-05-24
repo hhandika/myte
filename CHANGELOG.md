@@ -1,9 +1,10 @@
 # Release Notes
 
-## v0.2.3
+## v0.3.0
 
 - Organize species tree and concordance factor files.
 - Fix spinner errors a system that do not support UTF-8.
+- Prettier terminal output.
 
 ## v0.2.2
 
