@@ -61,7 +61,7 @@ trait Commons {
 
     fn set_spinner(&mut self, txt: &str) -> Spinner {
         let msg = txt.to_string();
-        Spinner::new(Spinners::Moon, msg)
+        Spinner::new(Spinners::Line, msg)
     }
 
     fn print_done(&self) {
@@ -111,7 +111,6 @@ impl<'a> GeneTrees<'a> {
         }
     }
 
-    // Search for alignments and get the path for them
     fn get_alignment_paths(&mut self) -> Vec<PathBuf> {
         let pattern = format!("{}/*.nexus", self.path);
         self.get_files(&pattern)
@@ -148,7 +147,6 @@ impl<'a> GeneTrees<'a> {
         self.organize_gene_files(&files, &prefix).unwrap();
     }
 
-    // Build gen tree using IQ-TREE
     fn call_iqtree(&self, prefix: &str) -> Output {
         let mut out = Command::new(&self.command);
         out.arg("-s")
