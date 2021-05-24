@@ -24,7 +24,7 @@ fn display_app_info(version: &str) -> Result<()> {
     let mut handle = io::BufWriter::new(io);
     writeln!(handle, "{} v{}", crate_name!(), version)?;
     writeln!(handle, "Genomics tools for phylogenetic tree estimation")?;
-    writeln!(handle, "Developer by Heru Handika")?;
+    writeln!(handle, "Developed by Heru Handika")?;
     writeln!(handle)?;
     utils::get_system_info(&mut handle)?;
 
