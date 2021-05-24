@@ -199,7 +199,10 @@ impl<'a> GeneTrees<'a> {
         let fname = "genes.treefiles";
         let file = File::create(&fname).expect("CANNOT CREATE AN ALL GENE TREE FILE");
         let mut treefile = LineWriter::new(file);
-        let txt = format!("Combining {} gene trees into a single file...", trees.len());
+        let txt = format!(
+            "Combining {} gene trees into a single file...\t",
+            trees.len()
+        );
         let spin = self.set_spinner(&txt);
         trees
             .iter()
