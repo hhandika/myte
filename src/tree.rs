@@ -308,7 +308,10 @@ impl<'a> ConcordFactor<'a> {
         fs::create_dir_all(&self.outdir)?;
         files.iter().for_each(|file| {
             let outdir = self.outdir.join(file);
-            fs::rename(file, outdir).expect("CANNOT MOVE IQ-TREE'S RESULT FILES");
+            let ext = file.extension().unwrap().to_string_lossy();
+            if ext != "tre" {
+                fs::rename(file, outdir).expect("CANNOT MOVE IQ-TREE'S RESULT FILES");
+            }
         });
 
         Ok(())
