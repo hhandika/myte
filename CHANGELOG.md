@@ -1,5 +1,10 @@
 # Release Notes
 
+## v0.2.3
+
+- Organize species tree and concordance factor files.
+- Fix spinner errors a system that do not support UTF-8.
+
 ## v0.2.2
 
 - Change auto to using available physical cores to estimate concordance factor.
