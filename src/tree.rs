@@ -11,10 +11,9 @@ use rayon::prelude::*;
 use spinners::{Spinner, Spinners};
 
 pub fn build_gene_trees(path: &str, version: i8) {
-    let treedir = Path::new("gene-treefiles");
-    let mut genes = GeneTrees::new(path, treedir, version);
+    let mut genes = GeneTrees::new(path, version);
     let paths = genes.get_alignment_paths();
-    genes.create_tree_files_dir(&treedir);
+    genes.create_tree_files_dir();
     genes.print_genes_paths(&paths).unwrap();
     let msg = format!("IQ-TREE is processing {} alignments...\t", paths.len());
     let spin = genes.set_spinner(&msg);
@@ -24,36 +23,40 @@ pub fn build_gene_trees(path: &str, version: i8) {
     genes.combine_gene_trees();
 }
 
-pub fn build_species_tree(path: &str, version: i8) {
+pub fn build_species_tree(path: &str) {
     let prefix = "concat";
     let dir_path = Path::new(path);
-    let treedir = Path::new("iqtree-species-tree");
-    let mut iqtree = Iqtree::new(version, &dir_path, prefix, treedir);
+    let mut iqtree = SpeciesTree::new(&dir_path, prefix);
     let msg = format!("IQ-TREE is processing species tree for {}...\t", path);
     let spin = iqtree.set_spinner(&msg);
-    iqtree.run_iqtree_species_tree();
+    iqtree.estimate_species_tree();
     spin.stop();
     iqtree.print_done();
 }
 
-pub fn estimate_concordance_factor(path: &str, version: i8) {
+pub fn estimate_concordance_factor(path: &str) {
     let prefix = "concord";
     let dir_path = Path::new(path);
     let treedir = Path::new("iqtree-CF");
-    let mut iqtree = Iqtree::new(version, &dir_path, prefix, treedir);
+    let mut iqtree = ConcordFactor::new(&dir_path, prefix, treedir);
     let msg = format!("IQ-TREE is processing concordance factor...\t");
     let spin = iqtree.set_spinner(&msg);
-    iqtree.run_iqtree_concordance();
+    iqtree.estimate_concordance();
     spin.stop();
     iqtree.print_done();
 }
 
 trait Commons {
-    fn get_files(&mut self, pattern: &str) -> Vec<PathBuf> {
+    fn get_files(&self, pattern: &str) -> Vec<PathBuf> {
         glob(pattern)
             .expect("COULD NOT FIND FILES")
             .filter_map(|ok| ok.ok())
             .collect()
+    }
+
+    fn get_iqtree_files(&self, prefix: &str) -> Vec<PathBuf> {
+        let pattern = format!("{}.*", prefix);
+        self.get_files(&pattern)
     }
 
     fn set_spinner(&mut self, txt: &str) -> Spinner {
@@ -66,23 +69,45 @@ trait Commons {
         let mut handle = stdout.lock();
         writeln!(handle, "\x1b[0;32mDONE!\x1b[0m").unwrap();
     }
+
+    fn check_process_success(&self, out: &Output, path: &Path) {
+        if !out.status.success() {
+            println!();
+            let msg = format!(
+                "\x1b[0;41mIQ-TREE FAILED TO PROCESS {}\x1b[0m\n",
+                path.to_string_lossy()
+            );
+            io::stdout().write(msg.as_bytes()).unwrap();
+            io::stdout().write_all(&out.stdout).unwrap();
+            io::stdout().write_all(&out.stderr).unwrap();
+            eprintln!(
+                "\x1b[0;41mERROR:\x1b[0m IQ-TREE failed to process {}. See the log output above.",
+                path.to_string_lossy()
+            );
+        }
+    }
 }
 
 impl Commons for GeneTrees<'_> {}
-impl Commons for Iqtree<'_> {}
+impl Commons for SpeciesTree<'_> {}
+impl Commons for ConcordFactor<'_> {}
 
 struct GeneTrees<'a> {
-    path: String,
-    treedir: &'a Path,
+    path: &'a str,
     version: i8,
+    command: String,
+    treedir: PathBuf,
+    parent_dir: PathBuf,
 }
 
 impl<'a> GeneTrees<'a> {
-    fn new(path: &str, treedir: &'a Path, version: i8) -> Self {
+    fn new(path: &'a str, version: i8) -> Self {
         Self {
-            path: String::from(path),
-            treedir,
+            path,
             version,
+            command: String::from("iqtree"),
+            treedir: PathBuf::from("gene-treefiles"),
+            parent_dir: PathBuf::from("iqtree-genes"),
         }
     }
 
@@ -104,11 +129,12 @@ impl<'a> GeneTrees<'a> {
         Ok(())
     }
 
-    fn create_tree_files_dir(&mut self, treedir: &Path) {
-        fs::create_dir_all(treedir).expect("CANNOT CREATE DIRECTORY FOR TREE FILES");
+    fn create_tree_files_dir(&mut self) {
+        fs::create_dir_all(&self.treedir).expect("CANNOT CREATE DIRECTORY FOR TREE FILES");
     }
 
     fn par_process_gene_trees(&mut self, paths: &[PathBuf]) {
+        self.get_iqtree_version();
         paths
             .par_iter()
             .for_each(|path| self.estimate_gene_tree(path));
@@ -116,8 +142,47 @@ impl<'a> GeneTrees<'a> {
 
     fn estimate_gene_tree(&self, path: &Path) {
         let prefix = path.file_stem().unwrap().to_string_lossy();
-        let mut iqtree = Iqtree::new(self.version, path, &prefix, &self.treedir);
-        iqtree.run_iqtree_gene_tree();
+        let out = self.call_iqtree(&prefix);
+        self.check_process_success(&out, path);
+        let files = self.get_iqtree_files(&prefix);
+        self.organize_gene_files(&files, &prefix).unwrap();
+    }
+
+    // Build gen tree using IQ-TREE
+    fn call_iqtree(&self, prefix: &str) -> Output {
+        let mut out = Command::new(&self.command);
+        out.arg("-s")
+            .arg(&self.path)
+            .arg("-T")
+            .arg("AUTO")
+            .arg("--prefix")
+            .arg(prefix)
+            .output()
+            .expect("FAILED TO RUN IQ-TREE")
+    }
+
+    fn get_iqtree_version(&mut self) {
+        if self.version == 2 {
+            self.command.push('2');
+        };
+    }
+
+    fn organize_gene_files(&self, files: &[PathBuf], prefix: &str) -> Result<()> {
+        let path = self.parent_dir.join(prefix);
+        let dir = Path::new(&path);
+        fs::create_dir_all(dir)?;
+        files.iter().for_each(|file| {
+            let ext = file.extension().unwrap().to_string_lossy();
+            if ext == "treefile" {
+                let outdir = self.treedir.join(file);
+                fs::rename(file, outdir).expect("CANNOT MOVE IQ-TREE'S TREE FILE");
+            } else {
+                let outdir = dir.join(file);
+                fs::rename(file, outdir).expect("CANNOT MOVE IQ-TREE'S RESULT FILES");
+            }
+        });
+
+        Ok(())
     }
 
     fn combine_gene_trees(&mut self) {
@@ -144,32 +209,32 @@ impl<'a> GeneTrees<'a> {
     }
 }
 
-struct Iqtree<'a> {
-    version: i8,
+struct SpeciesTree<'a> {
     path: &'a Path,
     prefix: &'a str,
     command: String,
-    treedir: &'a Path,
+    outdir: PathBuf,
 }
 
-impl<'a> Iqtree<'a> {
-    fn new(version: i8, path: &'a Path, prefix: &'a str, treedir: &'a Path) -> Self {
+impl<'a> SpeciesTree<'a> {
+    fn new(path: &'a Path, prefix: &'a str) -> Self {
         Self {
-            version,
             path,
             prefix,
-            treedir,
-            command: String::from("iqtree"),
+            outdir: PathBuf::from("iqtree-species-tree"),
+            command: String::from("iqtree2"),
         }
     }
 
-    fn run_iqtree_species_tree(&mut self) {
-        self.get_iqtree_version();
-        let out = self.call_iqtree_species();
-        self.check_iqtree_success(&out);
+    fn estimate_species_tree(&mut self) {
+        let out = self.call_iqtree();
+        self.check_process_success(&out, self.path);
+        let files = self.get_iqtree_files(self.prefix);
+        self.organize_species_files(&files)
+            .expect("FAILED TO MOVE SPECIES TREE RESULT FILES");
     }
 
-    fn call_iqtree_species(&mut self) -> Output {
+    fn call_iqtree(&mut self) -> Output {
         let mut out = Command::new(&self.command);
         out.arg("-p")
             .arg(&self.path)
@@ -183,35 +248,47 @@ impl<'a> Iqtree<'a> {
             .expect("FAILED TO RUN IQ-TREE")
     }
 
-    fn run_iqtree_gene_tree(&mut self) {
-        self.get_iqtree_version();
-        let out = self.call_iqtree_gene();
-        self.check_iqtree_success(&out);
-        let files = self.get_iqtree_gene_files();
-        self.move_iqtree_gene_files(&files).unwrap();
+    fn organize_species_files(&self, files: &[PathBuf]) -> Result<()> {
+        fs::create_dir_all(&self.outdir)?;
+        files.iter().for_each(|file| {
+            let outdir = self.outdir.join(file);
+            let ext = file.extension().unwrap().to_string_lossy();
+            if ext != "treefile" {
+                fs::rename(file, outdir).expect("CANNOT MOVE IQ-TREE'S RESULT FILES");
+            }
+        });
+
+        Ok(())
+    }
+}
+
+struct ConcordFactor<'a> {
+    path: &'a Path,
+    prefix: &'a str,
+    command: String,
+    outdir: &'a Path,
+}
+
+impl<'a> ConcordFactor<'a> {
+    fn new(path: &'a Path, prefix: &'a str, outdir: &'a Path) -> Self {
+        Self {
+            path,
+            prefix,
+            outdir,
+            command: String::from("iqtree2"),
+        }
     }
 
-    // Build gen tree using IQ-TREE
-    fn call_iqtree_gene(&mut self) -> Output {
-        let mut out = Command::new(&self.command);
-        out.arg("-s")
-            .arg(&self.path)
-            .arg("-T")
-            .arg("AUTO")
-            .arg("--prefix")
-            .arg(&self.prefix)
-            .output()
-            .expect("FAILED TO RUN IQ-TREE")
-    }
-
-    fn run_iqtree_concordance(&mut self) {
-        self.get_iqtree_version();
+    fn estimate_concordance(&mut self) {
         let cores = num_cpus::get_physical();
-        let out = self.call_iqtree_concordance(cores);
-        self.check_iqtree_success(&out);
+        let out = self.call_iqtree(cores);
+        self.check_process_success(&out, self.path);
+        let files = self.get_iqtree_files(self.prefix);
+        self.organize_cf_files(&files)
+            .expect("CANNOT MOVE CONCORDANCE FACTOR RESULT FILES");
     }
 
-    fn call_iqtree_concordance(&mut self, num_core: usize) -> Output {
+    fn call_iqtree(&mut self, num_core: usize) -> Output {
         let mut out = Command::new(&self.command);
         out.arg("-t")
             .arg("concat.treefile")
@@ -229,47 +306,11 @@ impl<'a> Iqtree<'a> {
             .expect("FAILED TO RUN IQ-TREE")
     }
 
-    fn get_iqtree_version(&mut self) {
-        if self.version == 2 {
-            self.command.push('2');
-        };
-    }
-
-    fn check_iqtree_success(&self, out: &Output) {
-        if !out.status.success() {
-            println!();
-            let msg = format!(
-                "\x1b[0;41mIQ-TREE FAILED TO PROCESS {}\x1b[0m",
-                self.path.to_string_lossy()
-            );
-            io::stdout().write(msg.as_bytes()).unwrap();
-            io::stdout().write_all(&out.stdout).unwrap();
-            io::stdout().write_all(&out.stderr).unwrap();
-            eprintln!(
-                "\x1b[0;41mERROR:\x1b[0m IQ-TREE failed to process {}. See the log output above.",
-                self.path.to_string_lossy()
-            );
-        }
-    }
-
-    fn get_iqtree_gene_files(&mut self) -> Vec<PathBuf> {
-        let pattern = format!("{}.*", self.prefix);
-        self.get_files(&pattern)
-    }
-
-    fn move_iqtree_gene_files(&mut self, files: &[PathBuf]) -> Result<()> {
-        let path = Path::new("iqtree-genes").join(self.prefix);
-        let dir = Path::new(&path);
-        fs::create_dir_all(dir)?;
+    fn organize_cf_files(&self, files: &[PathBuf]) -> Result<()> {
+        fs::create_dir_all(&self.outdir)?;
         files.iter().for_each(|file| {
-            let ext = file.extension().unwrap().to_string_lossy();
-            if ext == "treefile" {
-                let outdir = self.treedir.join(file);
-                fs::rename(file, outdir).expect("CANNOT MOVE IQ-TREE'S TREE FILE");
-            } else {
-                let outdir = dir.join(file);
-                fs::rename(file, outdir).expect("CANNOT MOVE IQ-TREE'S RESULT FILES");
-            }
+            let outdir = self.outdir.join(file);
+            fs::rename(file, outdir).expect("CANNOT MOVE IQ-TREE'S RESULT FILES");
         });
 
         Ok(())
@@ -283,8 +324,7 @@ mod test {
     #[test]
     fn get_gene_paths_test() {
         let path = "test_files";
-        let treefiles = Path::new(".");
-        let mut genes = GeneTrees::new(path, treefiles, 2);
+        let mut genes = GeneTrees::new(path, 2);
         let gene_paths = genes.get_alignment_paths();
 
         assert_eq!(2, gene_paths.len());
@@ -293,9 +333,8 @@ mod test {
     #[test]
     fn get_iqtree_version_test() {
         let version = 2;
-        let path = Path::new(".");
-        let trees = Path::new(".");
-        let mut iqtree = Iqtree::new(version, path, "loci", trees);
+        let path = ".";
+        let mut iqtree = GeneTrees::new(&path, version);
         iqtree.get_iqtree_version();
         assert_eq!("iqtree2", iqtree.command);
     }

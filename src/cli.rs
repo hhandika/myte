@@ -49,9 +49,9 @@ pub fn parse_cli(version: &str) {
 fn parse_auto_cli(matches: &ArgMatches) {
     let path = get_path(matches);
     let version = 2;
-    tree::build_species_tree(path, version);
+    tree::build_species_tree(path);
     tree::build_gene_trees(path, version);
-    tree::estimate_concordance_factor(path, version);
+    tree::estimate_concordance_factor(path);
     println!("DONE!");
 }
 
