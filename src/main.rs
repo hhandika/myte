@@ -23,7 +23,8 @@ fn display_app_info(version: &str) -> Result<()> {
     let io = io::stdout();
     let mut handle = io::BufWriter::new(io);
     writeln!(handle, "myte v{}", version)?;
-    writeln!(handle, "Developer: Heru Handika")?;
+    writeln!(handle, "Genomics tools for phylogenetic tree estimation")?;
+    writeln!(handle, "Developer by Heru Handika")?;
     writeln!(handle)?;
     utils::get_system_info(&mut handle)?;
     writeln!(handle)?;
