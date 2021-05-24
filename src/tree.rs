@@ -15,7 +15,10 @@ pub fn build_gene_trees(path: &str, version: i8) {
     let paths = genes.get_alignment_paths();
     genes.create_tree_files_dir();
     genes.print_genes_paths(&paths).unwrap();
-    let msg = format!("IQ-TREE is processing {} alignments...\t", paths.len());
+    let msg = format!(
+        "IQ-TREE is processing gene trees for {} alignments...\t",
+        paths.len()
+    );
     let spin = genes.set_spinner(&msg);
     genes.par_process_gene_trees(&paths);
     spin.stop();
@@ -27,7 +30,10 @@ pub fn build_species_tree(path: &str) {
     let prefix = "concat";
     let dir_path = Path::new(path);
     let mut iqtree = SpeciesTree::new(&dir_path, prefix);
-    let msg = format!("IQ-TREE is processing species tree for {}...\t", path);
+    let msg = format!(
+        "IQ-TREE is processing species tree for loci in {}...\t",
+        path
+    );
     let spin = iqtree.set_spinner(&msg);
     iqtree.estimate_species_tree();
     spin.stop();
@@ -119,7 +125,7 @@ impl<'a> GeneTrees<'a> {
     fn print_genes_paths(&self, paths: &[PathBuf]) -> Result<()> {
         let stdout = io::stdout();
         let mut handle = stdout.lock();
-        writeln!(handle, "\x1b[0;46mAlignment path: \x1b[0m")?;
+        writeln!(handle, "Alignment path:")?;
 
         paths
             .iter()
