@@ -27,7 +27,6 @@ fn display_app_info(version: &str) -> Result<()> {
     writeln!(handle, "Developer by Heru Handika")?;
     writeln!(handle)?;
     utils::get_system_info(&mut handle)?;
-    writeln!(handle)?;
 
     Ok(())
 }
