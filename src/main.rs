@@ -9,6 +9,7 @@ mod utils;
 fn main() {
     let version = crate_version!();
     let time = Instant::now();
+    display_app_info(version).unwrap();
     cli::parse_cli(version);
     let duration = time.elapsed();
     if duration.as_secs() < 60 {
@@ -18,12 +19,14 @@ fn main() {
     }
 }
 
-fn display_app_info(version: &str) {
+fn display_app_info(version: &str) -> Result<()> {
     let io = io::stdout();
     let mut handle = io::BufWriter::new(io);
-    writeln!(handle, "myte v{}", version);
-    writeln!("Developer: Heru Handika");
-    writeln!(handle);
-    utils::get_system_info(&mut handle);
-    writeln!(handle);
+    writeln!(handle, "myte v{}", version)?;
+    writeln!(handle, "Developer: Heru Handika")?;
+    writeln!(handle)?;
+    utils::get_system_info(&mut handle)?;
+    writeln!(handle)?;
+
+    Ok(())
 }
