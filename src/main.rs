@@ -1,4 +1,5 @@
 use clap::crate_version;
+use std::io::{self, Result, Write};
 use std::time::Instant;
 
 mod cli;
@@ -15,4 +16,14 @@ fn main() {
     } else {
         utils::print_formatted_duration(duration.as_secs());
     }
+}
+
+fn display_app_info(version: &str) {
+    let io = io::stdout();
+    let mut handle = io::BufWriter::new(io);
+    writeln!(handle, "myte v{}", version);
+    writeln!("Developer: Heru Handika");
+    writeln!(handle);
+    utils::get_system_info(&mut handle);
+    writeln!(handle);
 }

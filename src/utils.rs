@@ -1,6 +1,7 @@
 use std::io::{self, Result, Write};
 
 use chrono::NaiveTime;
+use sysinfo::{System, SystemExt};
 
 fn parse_duration(duration: u64) -> String {
     let sec = (duration % 60) as u32;
@@ -19,6 +20,58 @@ pub fn print_divider(text: &str, len: usize) {
     let sym = '=';
     let mut header = PrettyDivider::new(text, sym, len);
     header.print_header().unwrap();
+}
+
+pub fn get_system_info<W: Write>(handle: &mut W) -> Result<()> {
+    let sysinfo = sysinfo::System::new_all();
+    let total_ram = sysinfo.get_total_memory();
+    let gb = 1048576;
+
+    writeln!(handle, "\x1b[0;33mSystem Information\x1b[0m")?;
+
+    writeln!(
+        handle,
+        "Operating system\t: {} {}",
+        get_os_name(&sysinfo),
+        get_os_version(&sysinfo)
+    )?;
+
+    writeln!(
+        handle,
+        "Kernel version\t\t: {}",
+        get_kernel_version(&sysinfo)
+    )?;
+    writeln!(
+        handle,
+        "Available cores\t\t: {:?}",
+        num_cpus::get_physical()
+    )?;
+    writeln!(handle, "Available threads\t: {:?}", num_cpus::get())?;
+    writeln!(handle, "Total RAM\t\t: {} Gb", total_ram / gb)?;
+    writeln!(handle)?;
+
+    Ok(())
+}
+
+fn get_os_name(sysinfo: &System) -> String {
+    match sysinfo.get_name() {
+        Some(i) => i,
+        None => String::from("UNKNOWN"),
+    }
+}
+
+fn get_os_version(sysinfo: &System) -> String {
+    match sysinfo.get_os_version() {
+        Some(i) => i,
+        None => String::from(""),
+    }
+}
+
+fn get_kernel_version(sysinfo: &System) -> String {
+    match sysinfo.get_kernel_version() {
+        Some(i) => i,
+        None => String::from("UNKNOWN"),
+    }
 }
 
 struct PrettyDivider {
