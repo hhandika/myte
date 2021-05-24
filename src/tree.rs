@@ -10,9 +10,27 @@ use num_cpus;
 use rayon::prelude::*;
 use spinners::{Spinner, Spinners};
 
+pub fn build_species_tree(path: &str) {
+    let prefix = "concat";
+    let dir_path = Path::new(path);
+    let mut iqtree = SpeciesTree::new(&dir_path, prefix);
+    let msg = format!(
+        "IQ-TREE is processing species tree for alignments in {}...\t",
+        path
+    );
+    let spin = iqtree.set_spinner(&msg);
+    iqtree.estimate_species_tree();
+    spin.stop();
+    iqtree.print_done();
+}
+
 pub fn build_gene_trees(path: &str, version: i8) {
     let mut genes = GeneTrees::new(path, version);
     let paths = genes.get_alignment_paths();
+    assert!(
+        paths.len() > 1,
+        "LESS THAN ONE ALIGNMENT FOUND FOR GENE TREE ANALYSES"
+    );
     genes.create_tree_files_dir();
     genes.print_genes_paths(&paths).unwrap();
     let msg = format!(
@@ -24,20 +42,6 @@ pub fn build_gene_trees(path: &str, version: i8) {
     spin.stop();
     genes.print_done();
     genes.combine_gene_trees();
-}
-
-pub fn build_species_tree(path: &str) {
-    let prefix = "concat";
-    let dir_path = Path::new(path);
-    let mut iqtree = SpeciesTree::new(&dir_path, prefix);
-    let msg = format!(
-        "IQ-TREE is processing species tree for loci in {}...\t",
-        path
-    );
-    let spin = iqtree.set_spinner(&msg);
-    iqtree.estimate_species_tree();
-    spin.stop();
-    iqtree.print_done();
 }
 
 pub fn estimate_concordance_factor(path: &str) {
@@ -344,5 +348,12 @@ mod test {
         let mut iqtree = GeneTrees::new(&path, version);
         iqtree.get_iqtree_version();
         assert_eq!("iqtree2", iqtree.command);
+    }
+
+    #[test]
+    #[should_panic]
+    fn gene_tree_panic_test() {
+        let path = ".";
+        build_gene_trees(path, 2);
     }
 }
