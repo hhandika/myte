@@ -1,6 +1,7 @@
 use clap::{App, AppSettings, Arg, ArgMatches};
 
 use crate::tree;
+use crate::utils;
 
 fn get_args(version: &str) -> ArgMatches {
     App::new("myte")
@@ -49,10 +50,15 @@ pub fn parse_cli(version: &str) {
 fn parse_auto_cli(matches: &ArgMatches) {
     let path = get_path(matches);
     let version = 2;
+    let msg_len = 80;
+    print_species_tree_header(msg_len);
     tree::build_species_tree(path);
+    print_gene_tree_header(msg_len);
     tree::build_gene_trees(path, version);
+    print_cf_tree_header(msg_len);
     tree::estimate_concordance_factor(path);
-    println!("DONE!");
+    print_divider(msg_len);
+    println!("\nCOMPLETED!\n");
 }
 
 fn parse_gene_cli(matches: &ArgMatches) {
@@ -64,4 +70,23 @@ fn parse_gene_cli(matches: &ArgMatches) {
 
 fn get_path<'a>(matches: &'a ArgMatches) -> &'a str {
     matches.value_of("dir").expect("CANNOT GET DIRECTORY PATH")
+}
+
+fn print_species_tree_header(len: usize) {
+    let text = "IQ-TREE SPECIES TREE ANALYSES";
+    utils::print_divider(text, len);
+}
+
+fn print_gene_tree_header(len: usize) {
+    let text = "IQ-TREE GENE TREE ANALYSES";
+    utils::print_divider(text, len);
+}
+
+fn print_cf_tree_header(len: usize) {
+    let text = "IQ-TREE CONCORDANCE FACTOR ANALYSES";
+    utils::print_divider(text, len);
+}
+
+fn print_divider(len: usize) {
+    utils::print_divider("", len);
 }
