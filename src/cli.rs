@@ -1,6 +1,6 @@
 use clap::{App, AppSettings, Arg, ArgMatches};
 
-use crate::iqtree;
+use crate::tree;
 
 fn get_args(version: &str) -> ArgMatches {
     App::new("myte")
@@ -49,16 +49,16 @@ pub fn parse_cli(version: &str) {
 fn parse_auto_cli(matches: &ArgMatches) {
     let path = get_path(matches);
     let version = 2;
-    iqtree::build_species_tree(path, version);
-    iqtree::build_gene_trees(path, version);
-    iqtree::estimate_concordance_factor(path, version);
+    tree::build_species_tree(path, version);
+    tree::build_gene_trees(path, version);
+    tree::estimate_concordance_factor(path, version);
     println!("DONE!");
 }
 
 fn parse_gene_cli(matches: &ArgMatches) {
     let path = get_path(matches);
     let version = 2;
-    iqtree::build_gene_trees(path, version);
+    tree::build_gene_trees(path, version);
     println!("\nCOMPLETED!\n");
 }
 

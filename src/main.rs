@@ -2,7 +2,7 @@ use clap::crate_version;
 use std::time::Instant;
 
 mod cli;
-mod iqtree;
+mod tree;
 mod utils;
 
 fn main() {
