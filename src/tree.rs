@@ -6,23 +6,20 @@ use std::process::{Command, Output};
 use std::str;
 
 use glob::glob;
-use num_cpus;
-use rayon::prelude::*;
-// use spinners::{Spinner, Spinners};
 use indicatif::{ProgressBar, ProgressStyle};
+use rayon::prelude::*;
 
 pub fn build_species_tree(path: &str) {
-    let prefix = "concat";
     let dir_path = Path::new(path);
-    let mut iqtree = SpeciesTree::new(&dir_path, prefix);
+    let mut iqtree = SpeciesTree::new(&dir_path);
     let msg = format!(
-        "\x1b[0mIQ-TREE is processing species tree for alignments in {}...\t",
+        "\x1b[0mIQ-TREE is processing species tree for alignments in {}...",
         path
     );
     let spin = iqtree.set_spinner();
     spin.set_message(msg);
     iqtree.estimate_species_tree();
-    spin.finish_with_message("Species tree estimation\t DONE!");
+    spin.abandon_with_message("Species tree estimation: \t DONE!");
 }
 
 pub fn build_gene_trees(path: &str, version: i8) {
@@ -35,26 +32,24 @@ pub fn build_gene_trees(path: &str, version: i8) {
     genes.create_tree_files_dir();
     genes.print_genes_paths(&paths).unwrap();
     let msg = format!(
-        "\x1b[0mIQ-TREE is processing gene trees for {} alignments...\t",
+        "\x1b[0mIQ-TREE is processing gene trees for {} alignments...",
         paths.len()
     );
     let spin = genes.set_spinner();
     spin.set_message(msg);
     genes.par_process_gene_trees(&paths);
-    spin.finish_with_message("Gene tree estimation\t DONE!");
+    spin.abandon_with_message("Gene tree estimation: \t DONE!");
     genes.combine_gene_trees();
 }
 
 pub fn estimate_concordance_factor(path: &str) {
-    let prefix = "concord";
     let dir_path = Path::new(path);
-    let treedir = Path::new("iqtree-CF");
-    let mut iqtree = ConcordFactor::new(&dir_path, prefix, treedir);
-    let msg = format!("\x1b[0mIQ-TREE is processing concordance factor...\t");
+    let mut iqtree = ConcordFactor::new(&dir_path);
+    let msg = "\x1b[0mIQ-TREE is processing concordance factor...";
     let spin = iqtree.set_spinner();
     spin.set_message(msg);
     iqtree.estimate_concordance();
-    spin.finish_with_message("Estimating concordance factor:\t DONE!");
+    spin.finish_with_message("\x1b[0mEstimating concordance factor:\t DONE!");
 }
 
 trait Commons {
@@ -70,18 +65,12 @@ trait Commons {
         self.get_files(&pattern)
     }
 
-    fn set_spinner<'a>(&mut self) -> ProgressBar {
+    fn set_spinner(&mut self) -> ProgressBar {
         let spin = ProgressBar::new_spinner();
-        spin.enable_steady_tick(100);
+        spin.enable_steady_tick(150);
         spin.set_style(ProgressStyle::default_spinner().template("{spinner:.simpleDots} {msg}"));
         spin
     }
-
-    // fn print_done(&self) {
-    //     let stdout = io::stdout();
-    //     let mut handle = stdout.lock();
-    //     writeln!(handle, "\x1b[0;32mDONE!\x1b[0m").unwrap();
-    // }
 
     fn check_process_success(&self, out: &Output, path: &Path) {
         if !out.status.success() {
@@ -90,7 +79,7 @@ trait Commons {
                 "\x1b[0;41mIQ-TREE FAILED TO PROCESS {}\x1b[0m\n",
                 path.to_string_lossy()
             );
-            io::stdout().write(msg.as_bytes()).unwrap();
+            io::stdout().write_all(msg.as_bytes()).unwrap();
             io::stdout().write_all(&out.stdout).unwrap();
             io::stdout().write_all(&out.stderr).unwrap();
             eprintln!(
@@ -202,10 +191,7 @@ impl<'a> GeneTrees<'a> {
         let fname = "genes.treefiles";
         let file = File::create(&fname).expect("CANNOT CREATE AN ALL GENE TREE FILE");
         let mut treefile = LineWriter::new(file);
-        let msg = format!(
-            "Combining {} gene trees into a single file...\t",
-            trees.len()
-        );
+        let msg = format!("Combining {} gene trees into a single file...", trees.len());
         let spin = self.set_spinner();
         spin.set_message(msg);
         trees
@@ -225,16 +211,16 @@ impl<'a> GeneTrees<'a> {
 
 struct SpeciesTree<'a> {
     path: &'a Path,
-    prefix: &'a str,
+    prefix: String,
     command: String,
     outdir: PathBuf,
 }
 
 impl<'a> SpeciesTree<'a> {
-    fn new(path: &'a Path, prefix: &'a str) -> Self {
+    fn new(path: &'a Path) -> Self {
         Self {
             path,
-            prefix,
+            prefix: String::from("concat"),
             outdir: PathBuf::from("iqtree-species-tree"),
             command: String::from("iqtree2"),
         }
@@ -278,17 +264,17 @@ impl<'a> SpeciesTree<'a> {
 
 struct ConcordFactor<'a> {
     path: &'a Path,
-    prefix: &'a str,
+    outdir: PathBuf,
+    prefix: String,
     command: String,
-    outdir: &'a Path,
 }
 
 impl<'a> ConcordFactor<'a> {
-    fn new(path: &'a Path, prefix: &'a str, outdir: &'a Path) -> Self {
+    fn new(path: &'a Path) -> Self {
         Self {
             path,
-            prefix,
-            outdir,
+            outdir: PathBuf::from("iqtree-CF"),
+            prefix: String::from("concord"),
             command: String::from("iqtree2"),
         }
     }
