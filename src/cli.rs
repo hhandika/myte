@@ -8,7 +8,7 @@ use crate::utils;
 fn get_args(version: &str) -> ArgMatches {
     App::new("myte")
         .version(version)
-        .about("A tool for automatic genomic tree building")
+        .about("A tool for phylogenomic tree building")
         .author("Heru Handika <hhandi1@lsu.edu>")
         .setting(AppSettings::SubcommandRequiredElseHelp)
         .subcommand(App::new("check").about("Check dependencies"))
