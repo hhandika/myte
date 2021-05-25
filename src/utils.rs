@@ -1,6 +1,6 @@
 use std::io::{self, Result, Write};
 
-use chrono::NaiveTime;
+use chrono::{Local, NaiveTime};
 use sysinfo::{System, SystemExt};
 
 fn parse_duration(duration: u64) -> String {
@@ -48,6 +48,11 @@ pub fn get_system_info<W: Write>(handle: &mut W) -> Result<()> {
     )?;
     writeln!(handle, "Available threads\t: {:?}", num_cpus::get())?;
     writeln!(handle, "Total RAM\t\t: {} Gb", total_ram / gb)?;
+    writeln!(
+        handle,
+        "Time\t\t\t: {}",
+        Local::now().format("%Y-%m-%d %H:%M:%S")
+    )?;
     writeln!(handle)?;
 
     Ok(())
