@@ -1,5 +1,10 @@
 # Release Notes
 
+## v0.3.2
+- Cleaner terminal output.
+
+## v0.3.1
+- Fix spinner issues.
 ## v0.3.0
 
 - Organize species tree and concordance factor files.
