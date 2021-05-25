@@ -62,8 +62,8 @@ __Notes__: The program may failed to run in outdated HPC OS due to GLIBC errors.
 
 ```{Bash}
 myte 0.3.2
-Heru Handika <hhandi1@lsu.edu>
-A tool for automatic genomic tree building
+Heru Handika
+A tool for phylogenomic tree building
 
 USAGE:
     myte <SUBCOMMAND>
