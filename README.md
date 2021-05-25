@@ -18,6 +18,12 @@ Future goals:
 1. Incorporate multi-species coalescence analyses in the pipeline.
 2. Other tools useful for genomic tree estimation. The goal is to take advantage of Rust performance (identical to C/C++) to re-write typical genomic tasks that are inefficient to do in interpreted languages, such as Python, R, Perl, etc.
 
+
+<p align="center">
+ <img src="static/interface.png" width="500" >
+</p>
+
+
 ## Installation
 
 `myte` is a single executable command line app. The executable file will be available in the release [link](https://github.com/hhandika/myte/releases). Copy it to the folder that is registered in your PATH variable.
@@ -51,6 +57,27 @@ cargo build --release
 Your executable will be available at `/target/release/myte`. Copy it to the folder that is registered in your PATH variable.
 
 __Notes__: The program may failed to run in outdated HPC OS due to GLIBC errors. The solution is to compile it to fully static binary using `musl` compiler. See instruction [here](https://doc.rust-lang.org/edition-guide/rust-2018/platform-and-target-support/musl-support-for-fully-static-binaries.html). Then, to build the binary `cargo build --release --target x86_64-unknown-linux-musl`
+
+## Usages
+
+```{Bash}
+myte 0.3.2
+Heru Handika <hhandi1@lsu.edu
+A tool for automatic genomic tree building
+
+USAGE:
+    myte <SUBCOMMAND>
+
+FLAGS:
+    -h, --help       Prints help information
+    -V, --version    Prints version information
+
+SUBCOMMANDS:
+    auto     Auto estimate species tree, gene trees, and gene and site concordance factor
+    check    Check dependencies
+    gene     Batch gene tree estimation using IQ-Tree
+    help     Prints this message or the help of the given subcommand(s)
+```
 
 ## Status of the Code
 
