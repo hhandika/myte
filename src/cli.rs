@@ -45,7 +45,7 @@ pub fn parse_cli(version: &str) {
     let args = get_args(version);
     match args.subcommand() {
         ("auto", Some(auto_matches)) => parse_auto_cli(auto_matches, &version),
-        ("check", Some(_)) => println!("It's check dependencies"),
+        ("check", Some(_)) => display_app_info(&version).unwrap(),
         ("gene", Some(gene_matches)) => parse_gene_cli(gene_matches, &version),
         _ => unreachable!(),
     }
