@@ -8,20 +8,22 @@ use std::str;
 use glob::glob;
 use num_cpus;
 use rayon::prelude::*;
-use spinners::{Spinner, Spinners};
+// use spinners::{Spinner, Spinners};
+use indicatif::{ProgressBar, ProgressStyle};
 
 pub fn build_species_tree(path: &str) {
     let prefix = "concat";
     let dir_path = Path::new(path);
     let mut iqtree = SpeciesTree::new(&dir_path, prefix);
     let msg = format!(
-        "IQ-TREE is processing species tree for alignments in {}...\t",
+        "\x1b[0mIQ-TREE is processing species tree for alignments in {}...\t",
         path
     );
-    let spin = iqtree.set_spinner(&msg);
+    let spin = iqtree.set_spinner();
+    spin.set_message(msg);
     iqtree.estimate_species_tree();
-    spin.stop();
-    iqtree.print_done();
+    spin.abandon();
+    // iqtree.print_done();
 }
 
 pub fn build_gene_trees(path: &str, version: i8) {
@@ -34,13 +36,14 @@ pub fn build_gene_trees(path: &str, version: i8) {
     genes.create_tree_files_dir();
     genes.print_genes_paths(&paths).unwrap();
     let msg = format!(
-        "IQ-TREE is processing gene trees for {} alignments...\t",
+        "\x1b[0mIQ-TREE is processing gene trees for {} alignments...\t",
         paths.len()
     );
-    let spin = genes.set_spinner(&msg);
+    let spin = genes.set_spinner();
+    spin.set_message(msg);
     genes.par_process_gene_trees(&paths);
-    spin.stop();
-    genes.print_done();
+    spin.abandon();
+    // genes.print_done();
     genes.combine_gene_trees();
 }
 
@@ -49,11 +52,11 @@ pub fn estimate_concordance_factor(path: &str) {
     let dir_path = Path::new(path);
     let treedir = Path::new("iqtree-CF");
     let mut iqtree = ConcordFactor::new(&dir_path, prefix, treedir);
-    let msg = format!("IQ-TREE is processing concordance factor...\t");
-    let spin = iqtree.set_spinner(&msg);
+    let msg = format!("\x1b[0mIQ-TREE is processing concordance factor...\t");
+    let spin = iqtree.set_spinner();
+    spin.set_message(msg);
     iqtree.estimate_concordance();
-    spin.stop();
-    iqtree.print_done();
+    spin.abandon();
 }
 
 trait Commons {
@@ -69,16 +72,18 @@ trait Commons {
         self.get_files(&pattern)
     }
 
-    fn set_spinner(&mut self, txt: &str) -> Spinner {
-        let msg = txt.to_string();
-        Spinner::new(Spinners::Line, msg)
+    fn set_spinner<'a>(&mut self) -> ProgressBar {
+        let spin = ProgressBar::new_spinner();
+        spin.enable_steady_tick(100);
+        spin.set_style(ProgressStyle::default_spinner().template("{spinner:.simpleDots} {msg}"));
+        spin
     }
 
-    fn print_done(&self) {
-        let stdout = io::stdout();
-        let mut handle = stdout.lock();
-        writeln!(handle, "\x1b[0;32mDONE!\x1b[0m").unwrap();
-    }
+    // fn print_done(&self) {
+    //     let stdout = io::stdout();
+    //     let mut handle = stdout.lock();
+    //     writeln!(handle, "\x1b[0;32mDONE!\x1b[0m").unwrap();
+    // }
 
     fn check_process_success(&self, out: &Output, path: &Path) {
         if !out.status.success() {
@@ -199,16 +204,17 @@ impl<'a> GeneTrees<'a> {
         let fname = "genes.treefiles";
         let file = File::create(&fname).expect("CANNOT CREATE AN ALL GENE TREE FILE");
         let mut treefile = LineWriter::new(file);
-        let txt = format!(
+        let msg = format!(
             "Combining {} gene trees into a single file...\t",
             trees.len()
         );
-        let spin = self.set_spinner(&txt);
+        let spin = self.set_spinner();
+        spin.set_message(msg);
         trees
             .iter()
             .for_each(|tree| self.write_trees(&mut treefile, tree));
-        spin.stop();
-        self.print_done();
+        spin.abandon();
+        // self.print_done();
     }
 
     fn write_trees<W: Write>(&self, treefile: &mut W, tree_path: &Path) {
