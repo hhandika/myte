@@ -1,4 +1,6 @@
-use clap::{App, AppSettings, Arg, ArgMatches};
+use std::io::{self, Result, Write};
+
+use clap::{crate_name, App, AppSettings, Arg, ArgMatches};
 
 use crate::tree;
 use crate::utils;
@@ -40,30 +42,32 @@ fn get_args(version: &str) -> ArgMatches {
 pub fn parse_cli(version: &str) {
     let args = get_args(version);
     match args.subcommand() {
-        ("auto", Some(auto_matches)) => parse_auto_cli(auto_matches),
+        ("auto", Some(auto_matches)) => parse_auto_cli(auto_matches, &version),
         ("check", Some(_)) => println!("It's check dependencies"),
-        ("gene", Some(gene_matches)) => parse_gene_cli(gene_matches),
+        ("gene", Some(gene_matches)) => parse_gene_cli(gene_matches, &version),
         _ => unreachable!(),
     }
 }
 
-fn parse_auto_cli(matches: &ArgMatches) {
+fn parse_auto_cli(matches: &ArgMatches, version: &str) {
     let path = get_path(matches);
-    let version = 2;
+    let iqtree_version = 2;
     let msg_len = 80;
+    display_app_info(version).unwrap();
     print_species_tree_header(msg_len);
     tree::build_species_tree(path);
     print_gene_tree_header(msg_len);
-    tree::build_gene_trees(path, version);
+    tree::build_gene_trees(path, iqtree_version);
     print_cf_tree_header(msg_len);
     tree::estimate_concordance_factor(path);
     println!("\nCOMPLETED!\n");
 }
 
-fn parse_gene_cli(matches: &ArgMatches) {
+fn parse_gene_cli(matches: &ArgMatches, version: &str) {
     let path = get_path(matches);
-    let version = 2;
-    tree::build_gene_trees(path, version);
+    let iqtree_version = 2;
+    display_app_info(version).unwrap();
+    tree::build_gene_trees(path, iqtree_version);
     println!("\nCOMPLETED!\n");
 }
 
@@ -84,4 +88,16 @@ fn print_gene_tree_header(len: usize) {
 fn print_cf_tree_header(len: usize) {
     let text = "IQ-TREE: CONCORDANCE FACTOR ANALYSES";
     utils::print_divider(text, len);
+}
+
+fn display_app_info(version: &str) -> Result<()> {
+    let io = io::stdout();
+    let mut handle = io::BufWriter::new(io);
+    writeln!(handle, "{} v{}", crate_name!(), version)?;
+    writeln!(handle, "Genomics tools for phylogenetic tree estimation")?;
+    writeln!(handle, "Developed by Heru Handika")?;
+    writeln!(handle)?;
+    utils::get_system_info(&mut handle)?;
+
+    Ok(())
 }
