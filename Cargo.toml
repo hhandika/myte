@@ -1,6 +1,6 @@
 [package]
 name = "myte"
-version = "0.3.0"
+version = "0.3.1"
 authors = ["Heru Handika <herubiolog@gmail.com>"]
 edition = "2018"
 
@@ -12,6 +12,6 @@ chrono = "0.4.*"
 glob = "0.3.*"
 num_cpus = "1.13.*"
 rayon = "1.5.*"
-spinners = "1.2.*"
+indicatif = "0.16.*"
 sysinfo = "0.16.*"
 
