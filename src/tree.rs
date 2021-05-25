@@ -22,8 +22,7 @@ pub fn build_species_tree(path: &str) {
     let spin = iqtree.set_spinner();
     spin.set_message(msg);
     iqtree.estimate_species_tree();
-    spin.abandon();
-    // iqtree.print_done();
+    spin.finish_with_message("");
 }
 
 pub fn build_gene_trees(path: &str, version: i8) {
