@@ -26,7 +26,9 @@ fn get_args(version: &str) -> ArgMatches {
         )
         .subcommand(
             App::new("auto")
-                .about("Species and gene trees and gene and site concordance factors")
+                .about(
+                    "Auto estimate species tree, gene trees, and gene and site concordance factor",
+                )
                 .arg(
                     Arg::with_name("dir")
                         .short("d")
