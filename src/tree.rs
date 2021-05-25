@@ -229,7 +229,7 @@ impl<'a> SpeciesTree<'a> {
     fn estimate_species_tree(&mut self) {
         let out = self.call_iqtree();
         self.check_process_success(&out, self.path);
-        let files = self.get_iqtree_files(self.prefix);
+        let files = self.get_iqtree_files(&self.prefix);
         self.organize_species_files(&files)
             .expect("FAILED TO MOVE SPECIES TREE RESULT FILES");
     }
@@ -283,7 +283,7 @@ impl<'a> ConcordFactor<'a> {
         let cores = num_cpus::get_physical();
         let out = self.call_iqtree(cores);
         self.check_process_success(&out, self.path);
-        let files = self.get_iqtree_files(self.prefix);
+        let files = self.get_iqtree_files(&self.prefix);
         self.organize_cf_files(&files)
             .expect("CANNOT MOVE CONCORDANCE FACTOR RESULT FILES");
     }
