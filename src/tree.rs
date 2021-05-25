@@ -44,7 +44,7 @@ pub fn build_gene_trees(path: &str, version: i8) {
     genes.par_process_gene_trees(&paths);
 
     let finish_msg = format!(
-        "\x1b[0mFinished estimating gene trees for {} alignments",
+        "\x1b[0mFinished estimating gene trees for {} alignments!",
         num_alignments
     );
     spin.abandon_with_message(finish_msg);
