@@ -19,7 +19,7 @@ pub fn build_species_tree(path: &str) {
     let spin = iqtree.set_spinner();
     spin.set_message(msg);
     iqtree.estimate_species_tree();
-    spin.abandon_with_message("Species tree estimation: \t DONE!");
+    spin.abandon_with_message("Finished estimating species tree!");
 }
 
 pub fn build_gene_trees(path: &str, version: i8) {
@@ -29,16 +29,25 @@ pub fn build_gene_trees(path: &str, version: i8) {
         paths.len() > 1,
         "LESS THAN ONE ALIGNMENT FOUND FOR GENE TREE ANALYSES"
     );
+
     genes.create_tree_files_dir();
     genes.print_genes_paths(&paths).unwrap();
+
+    let num_alignments = paths.len();
     let msg = format!(
         "\x1b[0mIQ-TREE is processing gene trees for {} alignments...",
-        paths.len()
+        num_alignments
     );
+
     let spin = genes.set_spinner();
     spin.set_message(msg);
     genes.par_process_gene_trees(&paths);
-    spin.abandon_with_message("Gene tree estimation: \t DONE!");
+
+    let finish_msg = format!(
+        "\x1b[0mFinished estimating gene trees for {} alignments",
+        num_alignments
+    );
+    spin.abandon_with_message(finish_msg);
     genes.combine_gene_trees();
 }
 
@@ -49,7 +58,7 @@ pub fn estimate_concordance_factor(path: &str) {
     let spin = iqtree.set_spinner();
     spin.set_message(msg);
     iqtree.estimate_concordance();
-    spin.finish_with_message("\x1b[0mEstimating concordance factor:\t DONE!");
+    spin.finish_with_message("\x1b[0mFinished estimating concordance factor!");
 }
 
 trait Commons {
@@ -191,13 +200,15 @@ impl<'a> GeneTrees<'a> {
         let fname = "genes.treefiles";
         let file = File::create(&fname).expect("CANNOT CREATE AN ALL GENE TREE FILE");
         let mut treefile = LineWriter::new(file);
-        let msg = format!("Combining {} gene trees into a single file...", trees.len());
+        let num_trees = trees.len();
+        let msg = format!("Combining {} gene trees into a single file...", num_trees);
         let spin = self.set_spinner();
         spin.set_message(msg);
         trees
             .iter()
             .for_each(|tree| self.write_trees(&mut treefile, tree));
-        spin.finish_with_message("Combining gene tree files \t DONE!");
+        let finish_msg = format!("Finished combining {} gene trees!", num_trees);
+        spin.finish_with_message(finish_msg);
     }
 
     fn write_trees<W: Write>(&self, treefile: &mut W, tree_path: &Path) {
