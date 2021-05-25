@@ -22,7 +22,7 @@ pub fn build_species_tree(path: &str) {
     let spin = iqtree.set_spinner();
     spin.set_message(msg);
     iqtree.estimate_species_tree();
-    spin.finish_with_message("");
+    spin.finish_with_message("Species tree estimation\t DONE!");
 }
 
 pub fn build_gene_trees(path: &str, version: i8) {
@@ -41,8 +41,7 @@ pub fn build_gene_trees(path: &str, version: i8) {
     let spin = genes.set_spinner();
     spin.set_message(msg);
     genes.par_process_gene_trees(&paths);
-    spin.abandon();
-    // genes.print_done();
+    spin.finish_with_message("Gene tree estimation\t DONE!");
     genes.combine_gene_trees();
 }
 
@@ -55,7 +54,7 @@ pub fn estimate_concordance_factor(path: &str) {
     let spin = iqtree.set_spinner();
     spin.set_message(msg);
     iqtree.estimate_concordance();
-    spin.abandon();
+    spin.finish_with_message("Estimating concordance factor:\t DONE!");
 }
 
 trait Commons {
@@ -212,8 +211,7 @@ impl<'a> GeneTrees<'a> {
         trees
             .iter()
             .for_each(|tree| self.write_trees(&mut treefile, tree));
-        spin.abandon();
-        // self.print_done();
+        spin.finish_with_message("Combining gene tree files \t DONE!");
     }
 
     fn write_trees<W: Write>(&self, treefile: &mut W, tree_path: &Path) {
