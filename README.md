@@ -3,7 +3,7 @@
 ![myte-tests](https://github.com/hhandika/myte/workflows/myte-tests/badge.svg)
 [![Build Status](https://www.travis-ci.com/hhandika/myte.svg?branch=main)](https://www.travis-ci.com/hhandika/myte)
 
-A tool to simplify phylogemics data analyses.
+A tool for phylogenomic tree building
 
 Current goal:
 
