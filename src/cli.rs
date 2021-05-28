@@ -62,6 +62,8 @@ fn parse_auto_cli(matches: &ArgMatches, version: &str) {
     tree::build_gene_trees(path, iqtree_version);
     print_cf_tree_header(msg_len);
     tree::estimate_concordance_factor(path);
+    print_msc_tree_header(msg_len);
+    tree::estimate_msc_tree(path);
     println!("\nCOMPLETED!\n");
 }
 
@@ -89,6 +91,11 @@ fn print_gene_tree_header(len: usize) {
 
 fn print_cf_tree_header(len: usize) {
     let text = "IQ-TREE: CONCORDANCE FACTOR ANALYSES";
+    utils::print_divider(text, len);
+}
+
+fn print_msc_tree_header(len: usize) {
+    let text = "ASTRAL-MP: MULTI-SPECIES COALESCENCE MODEL ANALYSES";
     utils::print_divider(text, len);
 }
 

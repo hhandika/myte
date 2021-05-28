@@ -58,7 +58,17 @@ pub fn estimate_concordance_factor(path: &str) {
     let spin = iqtree.set_spinner();
     spin.set_message(msg);
     iqtree.estimate_concordance();
-    spin.finish_with_message("\x1b[0mFinished estimating concordance factor!");
+    spin.abandon_with_message("\x1b[0mFinished estimating concordance factor!");
+}
+
+pub fn estimate_msc_tree(path: &str) {
+    let dir = Path::new(path);
+    let mut astral = MSCTree::new(&dir);
+    let msg = "\x1b[0mASTRAL is processing MSC tree...";
+    let spin = astral.set_spinner();
+    spin.set_message(msg);
+    astral.estimate_msc_tree();
+    spin.abandon_with_message("\x1b[0mFinish estimating MSC tree");
 }
 
 trait Commons {
@@ -103,13 +113,20 @@ trait Names {
     fn get_genetree_fname(&self) -> String {
         String::from("genes.treefiles")
     }
+
+    fn get_mcs_tree_fname(&self) -> String {
+        String::from("msc_astral.tree")
+    }
 }
 
 impl Commons for GeneTrees<'_> {}
 impl Commons for SpeciesTree<'_> {}
 impl Commons for ConcordFactor<'_> {}
+impl Commons for MSCTree<'_> {}
 
 impl Names for GeneTrees<'_> {}
+impl Names for MSCTree<'_> {}
+impl Names for ConcordFactor<'_> {}
 
 struct GeneTrees<'a> {
     path: &'a str,
@@ -312,7 +329,7 @@ impl<'a> ConcordFactor<'a> {
         out.arg("-t")
             .arg("concat.treefile")
             .arg("--gcf")
-            .arg("genes.treefiles")
+            .arg(&self.get_genetree_fname())
             .arg("-p")
             .arg(&self.path)
             .arg("--scf")
@@ -336,6 +353,46 @@ impl<'a> ConcordFactor<'a> {
         });
 
         Ok(())
+    }
+}
+
+struct MSCTree<'a> {
+    path: &'a Path,
+    command: String,
+    astral_out: String,
+}
+
+impl<'a> MSCTree<'a> {
+    fn new(path: &'a Path) -> Self {
+        Self {
+            path,
+            command: String::from("astral"),
+            astral_out: String::from("astral.log"),
+        }
+    }
+
+    fn estimate_msc_tree(&self) {
+        let out = self.call_astral();
+        self.check_process_success(&out, self.path);
+        if out.status.success() {
+            self.write_astral_output(&out);
+        }
+    }
+
+    fn call_astral(&self) -> Output {
+        let mut out = Command::new(&self.command);
+
+        out.arg("-i")
+            .arg(&self.get_genetree_fname())
+            .arg("-o")
+            .arg(&self.get_mcs_tree_fname())
+            .output()
+            .expect("FAILED TO RUN ASTRAL")
+    }
+
+    fn write_astral_output(&self, out: &Output) {
+        let mut asral_log = File::create(&self.astral_out).expect("CANNOT WRITE ASTRAL OUTPUT");
+        write!(asral_log, "{}", str::from_utf8(&out.stdout).unwrap()).unwrap();
     }
 }
 
@@ -366,5 +423,21 @@ mod test {
     fn gene_tree_panic_test() {
         let path = ".";
         build_gene_trees(path, 2);
+    }
+
+    #[test]
+    fn get_genetree_fname_test() {
+        let version = 2;
+        let path = ".";
+        let iqtree = GeneTrees::new(&path, version);
+        let name = "genes.treefiles";
+        assert_eq!(name, iqtree.get_genetree_fname());
+    }
+
+    #[test]
+    fn get_astral_fname_test() {
+        let astral = MSCTree::new(Path::new("."));
+        let name = "msc_astral.tree";
+        assert_eq!(name, astral.get_mcs_tree_fname());
     }
 }
