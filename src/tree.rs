@@ -99,9 +99,17 @@ trait Commons {
     }
 }
 
+trait Names {
+    fn get_genetree_fname(&self) -> String {
+        String::from("genes.treefiles")
+    }
+}
+
 impl Commons for GeneTrees<'_> {}
 impl Commons for SpeciesTree<'_> {}
 impl Commons for ConcordFactor<'_> {}
+
+impl Names for GeneTrees<'_> {}
 
 struct GeneTrees<'a> {
     path: &'a str,
@@ -197,7 +205,7 @@ impl<'a> GeneTrees<'a> {
     fn combine_gene_trees(&mut self) {
         let pattern = format!("{}/*.treefile", self.treedir.to_string_lossy());
         let trees = self.get_files(&pattern);
-        let fname = "genes.treefiles";
+        let fname = self.get_genetree_fname();
         let file = File::create(&fname).expect("CANNOT CREATE AN ALL GENE TREE FILE");
         let mut treefile = LineWriter::new(file);
         let num_trees = trees.len();
