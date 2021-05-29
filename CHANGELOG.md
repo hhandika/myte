@@ -1,7 +1,9 @@
 # Release Notes
 
-## Upcoming
+## v0.4.0
 
+- Add multi species coalescence method using ASTRAL-MP.
+- Command to generate ASTRAL-MP executable.
 - Add current time to the terminal output.
 
 ## v0.3.2
