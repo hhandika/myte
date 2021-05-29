@@ -392,7 +392,7 @@ impl<'a> MSCTree<'a> {
 
     fn write_astral_output(&self, out: &Output) {
         let mut asral_log = File::create(&self.astral_out).expect("CANNOT WRITE ASTRAL OUTPUT");
-        write!(asral_log, "{}", str::from_utf8(&out.stdout).unwrap()).unwrap();
+        write!(asral_log, "{}", str::from_utf8(&out.stderr).unwrap()).unwrap();
     }
 }
 
