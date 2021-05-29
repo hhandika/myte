@@ -1,6 +1,6 @@
 use std::fs;
 use std::fs::File;
-use std::io::{self, LineWriter, Read, Result, Write};
+use std::io::{self, BufWriter, Read, Result, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 use std::str;
@@ -239,7 +239,7 @@ impl<'a> GeneTrees<'a> {
         let trees = self.get_files(&pattern);
         let fname = self.get_genetree_fname();
         let file = File::create(&fname).expect("CANNOT CREATE AN ALL GENE TREE FILE");
-        let mut treefile = LineWriter::new(file);
+        let mut treefile = BufWriter::new(file);
         let num_trees = trees.len();
         let msg = format!("Combining {} gene trees into a single file...", num_trees);
         let spin = self.set_spinner();
