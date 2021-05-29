@@ -22,6 +22,13 @@ fn get_args(version: &str) -> ArgMatches {
                         .help("Inputs folder path to locus alignment")
                         .takes_value(true)
                         .value_name("DIR"),
+                )
+                .arg(
+                    Arg::with_name("opts-g")
+                        .long("opts-g")
+                        .help("Inputs params for IQ-TREE gene tree analyses")
+                        .takes_value(true)
+                        .value_name("PARAMS"),
                 ),
         )
         .subcommand(
@@ -36,6 +43,13 @@ fn get_args(version: &str) -> ArgMatches {
                         .help("Inputs folder path to locus alignment")
                         .takes_value(true)
                         .value_name("DIR"),
+                )
+                .arg(
+                    Arg::with_name("opts-g")
+                        .long("opts-g")
+                        .help("Inputs params for IQ-TREE gene tree analyses")
+                        .takes_value(true)
+                        .value_name("PARAMS"),
                 ),
         )
         .get_matches()
@@ -55,11 +69,12 @@ fn parse_auto_cli(matches: &ArgMatches, version: &str) {
     let path = get_path(matches);
     let iqtree_version = 2;
     let msg_len = 80;
+    let params = parse_params_gene(matches);
     display_app_info(version).unwrap();
     print_species_tree_header(msg_len);
     tree::build_species_tree(path);
     print_gene_tree_header(msg_len);
-    tree::build_gene_trees(path, iqtree_version);
+    tree::build_gene_trees(path, iqtree_version, params);
     print_cf_tree_header(msg_len);
     tree::estimate_concordance_factor(path);
     print_msc_tree_header(msg_len);
@@ -70,9 +85,23 @@ fn parse_auto_cli(matches: &ArgMatches, version: &str) {
 fn parse_gene_cli(matches: &ArgMatches, version: &str) {
     let path = get_path(matches);
     let iqtree_version = 2;
+    let params = parse_params_gene(matches);
     display_app_info(version).unwrap();
-    tree::build_gene_trees(path, iqtree_version);
+    tree::build_gene_trees(path, iqtree_version, params);
     println!("\nCOMPLETED!\n");
+}
+
+fn parse_params_gene(matches: &ArgMatches) -> Option<String> {
+    let mut opts = None;
+    if matches.is_present("opts-g") {
+        let input = matches
+            .value_of("opts-g")
+            .expect("CANNOT PARSE PARAMS INPUT");
+        let params = input.replace("params=", "");
+        opts = Some(String::from(params.trim()));
+    }
+
+    opts
 }
 
 fn get_path<'a>(matches: &'a ArgMatches) -> &'a str {
