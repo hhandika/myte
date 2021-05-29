@@ -9,9 +9,9 @@ use glob::glob;
 use indicatif::{ProgressBar, ProgressStyle};
 use rayon::prelude::*;
 
-pub fn build_species_tree(path: &str) {
+pub fn build_species_tree(path: &str, params: &Option<String>) {
     let dir_path = Path::new(path);
-    let mut iqtree = SpeciesTree::new(&dir_path);
+    let mut iqtree = SpeciesTree::new(&dir_path, params);
     let msg = format!(
         "\x1b[0mIQ-TREE is processing species tree for alignments in {}...",
         path
@@ -22,7 +22,7 @@ pub fn build_species_tree(path: &str) {
     spin.abandon_with_message("Finished estimating species tree!");
 }
 
-pub fn build_gene_trees(path: &str, version: i8, params: Option<String>) {
+pub fn build_gene_trees(path: &str, version: i8, params: &Option<String>) {
     let mut genes = GeneTrees::new(path, version, params);
     let paths = genes.get_alignment_paths();
     assert!(
@@ -84,10 +84,6 @@ trait Commons {
         self.get_files(&pattern)
     }
 
-    fn get_thread_num(&self, out: &mut Command) {
-        out.arg("-T").arg("AUTO");
-    }
-
     fn set_spinner(&mut self) -> ProgressBar {
         let spin = ProgressBar::new_spinner();
         spin.enable_steady_tick(150);
@@ -123,6 +119,20 @@ trait Names {
     }
 }
 
+trait Params {
+    fn get_iqtree_params(&self, out: &mut Command, params: &Option<String>) {
+        if params.is_some() {
+            out.arg(params.as_ref().unwrap());
+        }
+    }
+
+    fn get_thread_num(&self, out: &mut Command, params: &Option<String>) {
+        if params.is_none() {
+            out.arg("-T").arg("AUTO");
+        }
+    }
+}
+
 impl Commons for GeneTrees<'_> {}
 impl Commons for SpeciesTree<'_> {}
 impl Commons for ConcordFactor<'_> {}
@@ -132,17 +142,20 @@ impl Names for GeneTrees<'_> {}
 impl Names for MSCTree<'_> {}
 impl Names for ConcordFactor<'_> {}
 
+impl Params for GeneTrees<'_> {}
+impl Params for SpeciesTree<'_> {}
+
 struct GeneTrees<'a> {
     path: &'a str,
     version: i8,
-    params: Option<String>,
+    params: &'a Option<String>,
     command: String,
     treedir: PathBuf,
     parent_dir: PathBuf,
 }
 
 impl<'a> GeneTrees<'a> {
-    fn new(path: &'a str, version: i8, params: Option<String>) -> Self {
+    fn new(path: &'a str, version: i8, params: &'a Option<String>) -> Self {
         Self {
             path,
             version,
@@ -192,8 +205,8 @@ impl<'a> GeneTrees<'a> {
     fn call_iqtree(&self, prefix: &str) -> Output {
         let mut out = Command::new(&self.command);
         out.arg("-s").arg(&self.path).arg("--prefix").arg(prefix);
-        self.get_thread_num(&mut out);
-        self.get_iqtree_params(&mut out);
+        self.get_thread_num(&mut out, &self.params);
+        self.get_iqtree_params(&mut out, &self.params);
         out.output().expect("FAILED TO RUN IQ-TREE")
     }
 
@@ -201,12 +214,6 @@ impl<'a> GeneTrees<'a> {
         if self.version == 2 {
             self.command.push('2');
         };
-    }
-
-    fn get_iqtree_params(&self, out: &mut Command) {
-        if self.params.is_some() {
-            out.arg(&self.params.as_ref().unwrap());
-        }
     }
 
     fn organize_gene_files(&self, files: &[PathBuf], prefix: &str) -> Result<()> {
@@ -257,16 +264,18 @@ struct SpeciesTree<'a> {
     path: &'a Path,
     prefix: String,
     command: String,
+    params: &'a Option<String>,
     outdir: PathBuf,
 }
 
 impl<'a> SpeciesTree<'a> {
-    fn new(path: &'a Path) -> Self {
+    fn new(path: &'a Path, params: &'a Option<String>) -> Self {
         Self {
             path,
             prefix: String::from("concat"),
             outdir: PathBuf::from("iqtree-species-tree"),
             command: String::from("iqtree2"),
+            params,
         }
     }
 
@@ -284,12 +293,12 @@ impl<'a> SpeciesTree<'a> {
             .arg(&self.path)
             .arg("-B")
             .arg("1000")
-            .arg("-T")
-            .arg("AUTO")
             .arg("--prefix")
-            .arg(&self.prefix)
-            .output()
-            .expect("FAILED TO RUN IQ-TREE")
+            .arg(&self.prefix);
+        self.get_thread_num(&mut out, &self.params);
+        self.get_iqtree_params(&mut out, &self.params);
+
+        out.output().expect("FAILED TO RUN IQ-TREE")
     }
 
     fn organize_species_files(&self, files: &[PathBuf]) -> Result<()> {
@@ -411,7 +420,7 @@ mod test {
     #[test]
     fn get_gene_paths_test() {
         let path = "test_files";
-        let mut genes = GeneTrees::new(path, 2, None);
+        let mut genes = GeneTrees::new(path, 2, &None);
         let gene_paths = genes.get_alignment_paths();
 
         assert_eq!(2, gene_paths.len());
@@ -421,7 +430,7 @@ mod test {
     fn get_iqtree_version_test() {
         let version = 2;
         let path = ".";
-        let mut iqtree = GeneTrees::new(&path, version, None);
+        let mut iqtree = GeneTrees::new(&path, version, &None);
         iqtree.get_iqtree_version();
         assert_eq!("iqtree2", iqtree.command);
     }
@@ -430,14 +439,14 @@ mod test {
     #[should_panic]
     fn gene_tree_panic_test() {
         let path = ".";
-        build_gene_trees(path, 2, None);
+        build_gene_trees(path, 2, &None);
     }
 
     #[test]
     fn get_genetree_fname_test() {
         let version = 2;
         let path = ".";
-        let iqtree = GeneTrees::new(&path, version, None);
+        let iqtree = GeneTrees::new(&path, version, &None);
         let name = "genes.treefiles";
         assert_eq!(name, iqtree.get_genetree_fname());
     }
