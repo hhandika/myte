@@ -68,7 +68,7 @@ pub fn estimate_msc_tree(path: &str) {
     let spin = astral.set_spinner();
     spin.set_message(msg);
     astral.estimate_msc_tree();
-    spin.abandon_with_message("\x1b[0mFinish estimating MSC tree");
+    spin.abandon_with_message("\x1b[0mFinished estimating MSC tree!");
 }
 
 trait Commons {
