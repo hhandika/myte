@@ -2,6 +2,7 @@ use std::io::{self, Result, Write};
 
 use clap::{crate_name, App, AppSettings, Arg, ArgMatches};
 
+use crate::deps;
 use crate::tree;
 use crate::utils;
 
@@ -59,6 +60,23 @@ fn get_args(version: &str) -> ArgMatches {
                         .value_name("PARAMS"),
                 ),
         )
+        .subcommand(
+            App::new("deps")
+                .about("Solves dependency issues")
+                .subcommand(
+                    App::new("astral")
+                        .about("Fixes astral dependency issues")
+                        .arg(
+                            Arg::with_name("jar")
+                                .short("-j")
+                                .long("jar")
+                                .help("Inputs path to the ASTRAL jar file.")
+                                .takes_value(true)
+                                .required(true)
+                                .value_name("ASTRAL JAR"),
+                        ),
+                ),
+        )
         .get_matches()
 }
 
@@ -66,8 +84,16 @@ pub fn parse_cli(version: &str) {
     let args = get_args(version);
     match args.subcommand() {
         ("auto", Some(auto_matches)) => parse_auto_cli(auto_matches, &version),
-        ("check", Some(_)) => display_app_info(&version).unwrap(),
         ("gene", Some(gene_matches)) => parse_gene_cli(gene_matches, &version),
+        ("check", Some(_)) => display_app_info(&version).unwrap(),
+        ("deps", Some(deps_matches)) => parse_deps_cli(deps_matches),
+        _ => unreachable!(),
+    }
+}
+
+fn parse_deps_cli(args: &ArgMatches) {
+    match args.subcommand() {
+        ("astral", Some(astral_matches)) => parse_astral_cli(astral_matches),
         _ => unreachable!(),
     }
 }
@@ -97,6 +123,13 @@ fn parse_gene_cli(matches: &ArgMatches, version: &str) {
     display_app_info(version).unwrap();
     tree::build_gene_trees(path, iqtree_version, &params);
     println!("\nCOMPLETED!\n");
+}
+
+fn parse_astral_cli(matches: &ArgMatches) {
+    let path = matches
+        .value_of("jar")
+        .expect("CANNOT PARSE ASTRAL JAR PATH");
+    deps::fix_astral_dependency(path);
 }
 
 fn parse_params_gene(matches: &ArgMatches) -> Option<String> {

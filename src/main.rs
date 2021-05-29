@@ -2,6 +2,7 @@ use clap::crate_version;
 use std::time::Instant;
 
 mod cli;
+mod deps;
 mod tree;
 mod utils;
 
