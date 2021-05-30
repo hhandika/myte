@@ -121,6 +121,7 @@ fn parse_gene_cli(matches: &ArgMatches, version: &str) {
     let iqtree_version = 2;
     let params = parse_params_gene(matches);
     display_app_info(version).unwrap();
+    print_gene_tree_header(80);
     tree::build_gene_trees(path, iqtree_version, &params);
     println!("\nCOMPLETED!\n");
 }
