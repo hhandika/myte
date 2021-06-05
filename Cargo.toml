@@ -12,4 +12,3 @@ num_cpus = "1.13.*"
 rayon = "1.5.*"
 indicatif = "0.16.*"
 sysinfo = "0.16.*"
-
