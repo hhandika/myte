@@ -300,8 +300,11 @@ impl<'a> SpeciesTree<'a> {
         self.get_thread_num(&mut out, &self.params);
 
         match self.params {
-            Some(params) => {
-                out.arg(params);
+            Some(param) => {
+                let params: Vec<&str> = param.split_whitespace().collect();
+                params.iter().for_each(|param| {
+                    out.arg(param);
+                });
             }
             None => {
                 out.arg("-B").arg("1000");
