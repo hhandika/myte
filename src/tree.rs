@@ -304,8 +304,7 @@ impl<'a> SpeciesTree<'a> {
                 out.arg(params);
             }
             None => {
-                out.arg("-B 1000 -T 3");
-                // .arg("1000");
+                out.arg("-B").arg("1000");
             }
         }
 
