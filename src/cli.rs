@@ -49,6 +49,7 @@ fn get_args(version: &str) -> ArgMatches {
                     Arg::with_name("opts-s")
                         .long("opts-s")
                         .help("Inputs params for IQ-TREE gene tree analyses")
+                        .require_equals(true)
                         .takes_value(true)
                         .value_name("PARAMS"),
                 )
@@ -56,6 +57,7 @@ fn get_args(version: &str) -> ArgMatches {
                     Arg::with_name("opts-g")
                         .long("opts-g")
                         .help("Inputs params for IQ-TREE gene tree analyses")
+                        .require_equals(true)
                         .takes_value(true)
                         .value_name("PARAMS"),
                 ),
@@ -139,8 +141,9 @@ fn parse_params_gene(matches: &ArgMatches) -> Option<String> {
         let input = matches
             .value_of("opts-g")
             .expect("CANNOT PARSE PARAMS INPUT");
-        let params = input.replace("params=", "");
-        opts = Some(String::from(params.trim()));
+        // let params = input.replace("params=", "");
+        // println!("Input : {}", input);
+        opts = Some(String::from(input.trim()));
     }
 
     opts
@@ -152,8 +155,9 @@ fn parse_params_species(matches: &ArgMatches) -> Option<String> {
         let input = matches
             .value_of("opts-s")
             .expect("CANNOT PARSE PARAMS INPUT");
-        let params = input.replace("params=", "");
-        opts = Some(String::from(params.trim()));
+        // let params = input.replace("params=", "");
+        // println!("Input : {}", input);
+        opts = Some(String::from(input.trim()));
     }
 
     opts

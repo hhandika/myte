@@ -87,7 +87,11 @@ trait Commons {
     fn set_spinner(&mut self) -> ProgressBar {
         let spin = ProgressBar::new_spinner();
         spin.enable_steady_tick(150);
-        spin.set_style(ProgressStyle::default_spinner().template("{spinner:.simpleDots} {msg}"));
+        spin.set_style(
+            ProgressStyle::default_spinner()
+                .tick_chars("🌑🌒🌓🌔🌕🌖🌗🌘")
+                .template("{spinner} {msg}"),
+        );
         spin
     }
 
@@ -291,12 +295,21 @@ impl<'a> SpeciesTree<'a> {
         let mut out = Command::new(&self.command);
         out.arg("-p")
             .arg(&self.path)
-            .arg("-B")
-            .arg("1000")
             .arg("--prefix")
             .arg(&self.prefix);
         self.get_thread_num(&mut out, &self.params);
-        self.get_iqtree_params(&mut out, &self.params);
+
+        match self.params {
+            Some(params) => {
+                out.arg(params);
+            }
+            None => {
+                out.arg("-B 1000 -T 3");
+                // .arg("1000");
+            }
+        }
+
+        // self.get_iqtree_params(&mut out, &self.params);
 
         out.output().expect("FAILED TO RUN IQ-TREE")
     }
