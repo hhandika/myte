@@ -74,7 +74,7 @@ pub fn estimate_msc_tree(path: &str) {
 trait Commons {
     fn get_files(&self, pattern: &str) -> Vec<PathBuf> {
         glob(pattern)
-            .expect("COULD NOT FIND FILES")
+            .expect("Failed finding alignment files")
             .filter_map(|ok| ok.ok())
             .collect()
     }
