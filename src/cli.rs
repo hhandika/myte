@@ -105,12 +105,12 @@ fn parse_auto_cli(matches: &ArgMatches, version: &str) {
     let iqtree_version = 2;
     let msg_len = 80;
     let params_s = parse_params_species(matches);
-    let params_g = parse_params_gene(matches);
+    // let params_g = parse_params_gene(matches);
     display_app_info(version).unwrap();
     print_species_tree_header(msg_len);
     tree::build_species_tree(path, &params_s);
     print_gene_tree_header(msg_len);
-    tree::build_gene_trees(path, iqtree_version, &params_g);
+    tree::build_gene_trees(path, iqtree_version);
     print_cf_tree_header(msg_len);
     tree::estimate_concordance_factor(path);
     print_msc_tree_header(msg_len);
@@ -120,12 +120,12 @@ fn parse_auto_cli(matches: &ArgMatches, version: &str) {
 
 fn parse_gene_cli(matches: &ArgMatches, version: &str) {
     let path = get_path(matches);
-    let iqtree_version = 2;
+    let iqtree_version = 1;
     let msg_len = 80;
-    let params = parse_params_gene(matches);
+    // let params = parse_params_gene(matches);
     display_app_info(version).unwrap();
     print_gene_tree_header(msg_len);
-    tree::build_gene_trees(path, iqtree_version, &params);
+    tree::build_gene_trees(path, iqtree_version);
     print_cf_tree_header(msg_len);
     tree::estimate_concordance_factor(path);
     print_msc_tree_header(msg_len);
@@ -140,17 +140,17 @@ fn parse_astral_cli(matches: &ArgMatches) {
     deps::fix_astral_dependency(path);
 }
 
-fn parse_params_gene(matches: &ArgMatches) -> Option<String> {
-    let mut opts = None;
-    if matches.is_present("opts-g") {
-        let input = matches
-            .value_of("opts-g")
-            .expect("CANNOT PARSE PARAMS INPUT");
-        opts = Some(String::from(input.trim()));
-    }
+// fn parse_params_gene(matches: &ArgMatches) -> Option<String> {
+//     let mut opts = None;
+//     if matches.is_present("opts-g") {
+//         let input = matches
+//             .value_of("opts-g")
+//             .expect("CANNOT PARSE PARAMS INPUT");
+//         opts = Some(String::from(input.trim()));
+//     }
 
-    opts
-}
+//     opts
+// }
 
 fn parse_params_species(matches: &ArgMatches) -> Option<String> {
     let mut opts = None;

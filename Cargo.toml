@@ -13,6 +13,3 @@ rayon = "1.5.*"
 indicatif = "0.16.*"
 sysinfo = "0.16.*"
 
-
-[profile.release]
-# lto = "fat"

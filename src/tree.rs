@@ -22,8 +22,8 @@ pub fn build_species_tree(path: &str, params: &Option<String>) {
     spin.abandon_with_message("Finished estimating species tree!");
 }
 
-pub fn build_gene_trees(path: &str, version: i8, params: &Option<String>) {
-    let mut genes = GeneTrees::new(path, version, params);
+pub fn build_gene_trees(path: &str, version: i8) {
+    let mut genes = GeneTrees::new(path, version);
     let paths = genes.get_alignment_paths();
     assert!(
         paths.len() > 1,
@@ -160,19 +160,19 @@ impl Params for SpeciesTree<'_> {}
 struct GeneTrees<'a> {
     path: &'a str,
     version: i8,
-    params: &'a Option<String>,
+    // params: &'a Option<String>,
     command: String,
     treedir: PathBuf,
     parent_dir: PathBuf,
 }
 
 impl<'a> GeneTrees<'a> {
-    fn new(path: &'a str, version: i8, params: &'a Option<String>) -> Self {
+    fn new(path: &'a str, version: i8) -> Self {
         Self {
             path,
             version,
-            params,
-            command: String::from("iqtree"),
+            // params,
+            command: String::from("iqtree2"),
             treedir: PathBuf::from("gene-treefiles"),
             parent_dir: PathBuf::from("iqtree-genes"),
         }
@@ -203,18 +203,10 @@ impl<'a> GeneTrees<'a> {
 
     fn estimate_gene_tree(&self, path: &Path) {
         let prefix = path.file_stem().unwrap().to_string_lossy();
-        let out = self.call_iqtree(&prefix);
+        let out = call_iqtree(path, &prefix);
         self.check_process_success(&out, path);
         let files = self.get_iqtree_files(&prefix);
         self.organize_gene_files(&files, &prefix).unwrap();
-    }
-
-    fn call_iqtree(&self, prefix: &str) -> Output {
-        let mut out = Command::new(&self.command);
-        out.arg("-s").arg(&self.path).arg("--prefix").arg(prefix);
-        self.get_thread_num(&mut out, &self.params);
-        self.get_iqtree_params(&mut out, &self.params);
-        out.output().expect("FAILED TO RUN IQ-TREE")
     }
 
     fn get_iqtree_version(&mut self) {
@@ -265,6 +257,18 @@ impl<'a> GeneTrees<'a> {
             .expect("CANNOT READ TREE FILES");
         writeln!(treefile, "{}", content.trim()).unwrap();
     }
+}
+
+fn call_iqtree(path: &Path, prefix: &str) -> Output {
+    let mut out = Command::new("iqtree2");
+    out.arg("-s")
+        .arg(path)
+        .arg("-T")
+        .arg("1")
+        .arg("--prefix")
+        .arg(prefix)
+        .output()
+        .expect("FAILED TO RUN IQ-TREE")
 }
 
 struct SpeciesTree<'a> {
@@ -349,7 +353,7 @@ impl<'a> ConcordFactor<'a> {
     fn call_iqtree(&mut self, num_core: usize) -> Output {
         let mut out = Command::new(&self.command);
         out.arg("-t")
-            .arg("concat.treefile")
+            .arg("genes.treefiles")
             .arg("--gcf")
             .arg(&self.get_genetree_fname())
             .arg("-p")
@@ -425,7 +429,7 @@ mod test {
     #[test]
     fn get_gene_paths_test() {
         let path = "test_files";
-        let mut genes = GeneTrees::new(path, 2, &None);
+        let mut genes = GeneTrees::new(path, 2);
         let gene_paths = genes.get_alignment_paths();
 
         assert_eq!(2, gene_paths.len());
@@ -435,7 +439,7 @@ mod test {
     fn get_iqtree_version_test() {
         let version = 2;
         let path = ".";
-        let mut iqtree = GeneTrees::new(&path, version, &None);
+        let mut iqtree = GeneTrees::new(&path, version);
         iqtree.get_iqtree_version();
         assert_eq!("iqtree2", iqtree.command);
     }
@@ -444,14 +448,14 @@ mod test {
     #[should_panic]
     fn gene_tree_panic_test() {
         let path = ".";
-        build_gene_trees(path, 2, &None);
+        build_gene_trees(path, 2);
     }
 
     #[test]
     fn get_genetree_fname_test() {
         let version = 2;
         let path = ".";
-        let iqtree = GeneTrees::new(&path, version, &None);
+        let iqtree = GeneTrees::new(&path, version);
         let name = "genes.treefiles";
         assert_eq!(name, iqtree.get_genetree_fname());
     }
