@@ -31,7 +31,7 @@ pub fn build_gene_trees(path: &str, version: i8, params: &Option<String>) {
     );
 
     genes.create_tree_files_dir();
-    genes.print_genes_paths(&paths).unwrap();
+    genes.print_genes_paths(&path).unwrap();
 
     let num_alignments = paths.len();
     let msg = format!(
@@ -125,8 +125,16 @@ trait Names {
 
 trait Params {
     fn get_iqtree_params(&self, out: &mut Command, params: &Option<String>) {
-        if params.is_some() {
-            out.arg(params.as_ref().unwrap());
+        match params {
+            Some(param) => {
+                let params: Vec<&str> = param.split_whitespace().collect();
+                params.iter().for_each(|param| {
+                    out.arg(param);
+                });
+            }
+            None => {
+                out.arg("-B").arg("1000");
+            }
         }
     }
 
@@ -175,15 +183,10 @@ impl<'a> GeneTrees<'a> {
         self.get_files(&pattern)
     }
 
-    fn print_genes_paths(&self, paths: &[PathBuf]) -> Result<()> {
+    fn print_genes_paths<P: AsRef<Path>>(&self, path: &P) -> Result<()> {
         let stdout = io::stdout();
         let mut handle = stdout.lock();
-        writeln!(handle, "Alignment path:")?;
-
-        paths
-            .iter()
-            .for_each(|path| writeln!(handle, "{}", path.to_string_lossy()).unwrap());
-        writeln!(handle)?;
+        writeln!(handle, "Alignment path: {}\n", path.as_ref().display())?;
         Ok(())
     }
 
@@ -298,20 +301,7 @@ impl<'a> SpeciesTree<'a> {
             .arg("--prefix")
             .arg(&self.prefix);
         self.get_thread_num(&mut out, &self.params);
-
-        match self.params {
-            Some(param) => {
-                let params: Vec<&str> = param.split_whitespace().collect();
-                params.iter().for_each(|param| {
-                    out.arg(param);
-                });
-            }
-            None => {
-                out.arg("-B").arg("1000");
-            }
-        }
-
-        // self.get_iqtree_params(&mut out, &self.params);
+        self.get_iqtree_params(&mut out, &self.params);
 
         out.output().expect("FAILED TO RUN IQ-TREE")
     }
