@@ -354,7 +354,7 @@ impl<'a> ConcordFactor<'a> {
     fn call_iqtree(&mut self, num_core: usize) -> Output {
         let mut out = Command::new(&self.command);
         out.arg("-t")
-            .arg("genes.treefiles")
+            .arg("concat.treefile")
             .arg("--gcf")
             .arg(&self.get_genetree_fname())
             .arg("-p")
