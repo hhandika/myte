@@ -267,6 +267,7 @@ fn call_iqtree(path: &Path, prefix: &str) -> Output {
         .arg("1")
         .arg("--prefix")
         .arg(prefix)
+        .arg("-keep-ident") // Avoid identity missing issues
         .output()
         .expect("FAILED TO RUN IQ-TREE")
 }
