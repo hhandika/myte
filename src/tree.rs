@@ -86,11 +86,6 @@ trait Commons {
             .collect()
     }
 
-    fn get_iqtree_files(&self, prefix: &str) -> Vec<PathBuf> {
-        let pattern = format!("{}.*", prefix);
-        self.get_files(&pattern)
-    }
-
     fn set_spinner(&mut self) -> ProgressBar {
         let spin = ProgressBar::new_spinner();
         spin.enable_steady_tick(150);
@@ -169,7 +164,7 @@ impl<'a> GeneTrees<'a> {
         let iqtree = Process::new(path, self.params);
         let out = iqtree.run_iqtree(&prefix);
         self.check_process_success(&out, path);
-        let files = self.get_iqtree_files(&prefix);
+        let files = iqtree.get_iqtree_files(&prefix);
         self.organize_gene_files(&files, &prefix).unwrap();
     }
 
@@ -238,7 +233,7 @@ impl<'a> SpeciesTree<'a> {
         let iqtree = Process::new(self.path, self.params);
         let out = iqtree.run_iqtree(&self.prefix);
         self.check_process_success(&out, self.path);
-        let files = self.get_iqtree_files(&self.prefix);
+        let files = iqtree.get_iqtree_files(&self.prefix);
         self.organize_species_files(&files)
             .expect("FAILED TO MOVE SPECIES TREE RESULT FILES");
     }
@@ -276,7 +271,7 @@ impl<'a> ConcordFactor<'a> {
         let iqtree = Process::new(self.path, &None);
         let out = iqtree.run_iqtree_concord(&self.prefix);
         self.check_process_success(&out, self.path);
-        let files = self.get_iqtree_files(&self.prefix);
+        let files = iqtree.get_iqtree_files(&self.prefix);
         self.organize_cf_files(&files)
             .expect("CANNOT MOVE CONCORDANCE FACTOR RESULT FILES");
     }
@@ -294,6 +289,36 @@ impl<'a> ConcordFactor<'a> {
         Ok(())
     }
 }
+
+struct MSCTree<'a> {
+    path: &'a Path,
+    astral_out: String,
+}
+
+impl<'a> MSCTree<'a> {
+    fn new(path: &'a Path) -> Self {
+        Self {
+            path,
+            astral_out: String::from("astral.log"),
+        }
+    }
+
+    fn estimate_msc_tree(&self) {
+        let astral = Process::new(self.path, &None);
+        let out = astral.run_astral();
+        self.check_process_success(&out, self.path);
+        if out.status.success() {
+            self.write_astral_output(&out);
+        }
+    }
+
+    fn write_astral_output(&self, out: &Output) {
+        let mut asral_log = File::create(&self.astral_out).expect("CANNOT WRITE ASTRAL OUTPUT");
+        write!(asral_log, "{}", str::from_utf8(&out.stderr).unwrap()).unwrap();
+    }
+}
+
+impl Commons for Process<'_> {}
 
 struct Process<'a> {
     path: &'a Path,
@@ -356,38 +381,15 @@ impl<'a> Process<'a> {
         }
     }
 
+    fn get_iqtree_files(&self, prefix: &str) -> Vec<PathBuf> {
+        let pattern = format!("{}.*", prefix);
+        self.get_files(&pattern)
+    }
+
     fn get_thread_num(&self, out: &mut Command) {
         if self.params.is_none() {
             out.arg("-T").arg("1");
         }
-    }
-}
-
-struct MSCTree<'a> {
-    path: &'a Path,
-    astral_out: String,
-}
-
-impl<'a> MSCTree<'a> {
-    fn new(path: &'a Path) -> Self {
-        Self {
-            path,
-            astral_out: String::from("astral.log"),
-        }
-    }
-
-    fn estimate_msc_tree(&self) {
-        let astral = Process::new(self.path, &None);
-        let out = astral.run_astral();
-        self.check_process_success(&out, self.path);
-        if out.status.success() {
-            self.write_astral_output(&out);
-        }
-    }
-
-    fn write_astral_output(&self, out: &Output) {
-        let mut asral_log = File::create(&self.astral_out).expect("CANNOT WRITE ASTRAL OUTPUT");
-        write!(asral_log, "{}", str::from_utf8(&out.stderr).unwrap()).unwrap();
     }
 }
 
