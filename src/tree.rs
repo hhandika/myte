@@ -413,7 +413,7 @@ impl<'a> Process<'a> {
 mod test {
     use super::*;
 
-    const INPUT_FMT: InputFmt = InputFmt::Fasta;
+    const INPUT_FMT: InputFmt = InputFmt::Nexus;
 
     #[test]
     fn get_gene_paths_test() {
