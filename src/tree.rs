@@ -9,12 +9,26 @@ use glob::glob;
 use indicatif::{ProgressBar, ProgressStyle};
 use rayon::prelude::*;
 
+// Executable file name
 const IQTREE_EXE: &str = "iqtree2";
 const ASTRAL_EXE: &str = "astral";
+
+// Directories and filenames for species tree estimation
+const SPECIES_TREE_PREFIX: &str = "concat";
+const SPECIES_TREE_OUTPUT_DIR: &str = "iqtree-species-tree";
+
+// Directories and file name for gene tree estimation
 const GENE_TREE_NAME: &str = "genes.treefiles";
-const ASTRAL_TREE_NAME: &str = "msc_astral.tree";
-const GENE_IQTREE_DIR: &str = "iqtree-genes";
+const GENE_TREE_OUTPUT_DIR: &str = "iqtree-genes";
 const GENE_TREE_DIR: &str = "gene-treefiles";
+
+// Concordance factor estimation
+const CONCORD_FACTOR_OUTPUT_DIR: &str = "iqtree-CF";
+const CONCORD_FACTOR_PREFIX: &str = "concord";
+
+// Astral msc constant
+const ASTRAL_TREE_NAME: &str = "msc_astral.tree";
+const ASTRAL_LOG_NAME: &str = "msc_astral.log";
 
 pub fn build_species_tree(path: &str, params: &Option<String>) {
     let dir_path = Path::new(path);
@@ -140,7 +154,7 @@ impl<'a> GeneTrees<'a> {
             path,
             params,
             treedir: Path::new(GENE_TREE_DIR),
-            parent_dir: Path::new(GENE_IQTREE_DIR),
+            parent_dir: Path::new(GENE_TREE_OUTPUT_DIR),
             input_fmt,
         }
     }
@@ -230,17 +244,17 @@ impl<'a> GeneTrees<'a> {
 
 struct SpeciesTree<'a> {
     path: &'a Path,
-    prefix: String,
+    prefix: &'a str,
     params: &'a Option<String>,
-    outdir: PathBuf,
+    outdir: &'a Path,
 }
 
 impl<'a> SpeciesTree<'a> {
     fn new(path: &'a Path, params: &'a Option<String>) -> Self {
         Self {
             path,
-            prefix: String::from("concat"),
-            outdir: PathBuf::from("iqtree-species-tree"),
+            prefix: SPECIES_TREE_PREFIX,
+            outdir: Path::new(SPECIES_TREE_OUTPUT_DIR),
             params,
         }
     }
@@ -270,16 +284,16 @@ impl<'a> SpeciesTree<'a> {
 
 struct ConcordFactor<'a> {
     path: &'a Path,
-    outdir: PathBuf,
-    prefix: String,
+    outdir: &'a Path,
+    prefix: &'a str,
 }
 
 impl<'a> ConcordFactor<'a> {
     fn new(path: &'a Path) -> Self {
         Self {
             path,
-            outdir: PathBuf::from("iqtree-CF"),
-            prefix: String::from("concord"),
+            outdir: Path::new(CONCORD_FACTOR_OUTPUT_DIR),
+            prefix: CONCORD_FACTOR_PREFIX,
         }
     }
 
@@ -308,14 +322,14 @@ impl<'a> ConcordFactor<'a> {
 
 struct MSCTree<'a> {
     path: &'a Path,
-    astral_out: String,
+    astral_out: &'a str,
 }
 
 impl<'a> MSCTree<'a> {
     fn new(path: &'a Path) -> Self {
         Self {
             path,
-            astral_out: String::from("astral.log"),
+            astral_out: ASTRAL_LOG_NAME,
         }
     }
 
