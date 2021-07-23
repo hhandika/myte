@@ -30,6 +30,17 @@ fn get_args(version: &str) -> ArgMatches {
                         .help("Inputs params for IQ-TREE gene tree analyses")
                         .takes_value(true)
                         .value_name("PARAMS"),
+                )
+                .arg(
+                    Arg::with_name("input-fmt")
+                        .short("f")
+                        .long("input-fmt")
+                        .help("Sets input format")
+                        .required(true)
+                        .takes_value(true)
+                        .default_value("nexus")
+                        .possible_values(&["fasta", "phylip", "nexus"])
+                        .value_name("PARAMS"),
                 ),
         )
         .subcommand(
@@ -66,7 +77,9 @@ fn get_args(version: &str) -> ArgMatches {
                         .short("f")
                         .long("input-fmt")
                         .help("Sets input format")
+                        .required(true)
                         .takes_value(true)
+                        .default_value("nexus")
                         .possible_values(&["fasta", "phylip", "nexus"])
                         .value_name("PARAMS"),
                 ),
@@ -175,7 +188,7 @@ fn parse_params_species(matches: &ArgMatches) -> Option<String> {
 
 fn parse_input_fmt(matches: &ArgMatches) -> InputFmt {
     let input_fmt = matches
-        .value_of("format")
+        .value_of("input-fmt")
         .expect("CANNOT READ FORMAT INPUT");
     match input_fmt {
         "fasta" => InputFmt::Fasta,
