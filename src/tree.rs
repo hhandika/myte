@@ -172,7 +172,7 @@ impl<'a> GeneTrees<'a> {
             path,
             version,
             // params,
-            command: String::from("iqtree2"),
+            command: String::from("iqtree"),
             treedir: PathBuf::from("gene-treefiles"),
             parent_dir: PathBuf::from("iqtree-genes"),
         }
@@ -263,11 +263,11 @@ fn call_iqtree(path: &Path, prefix: &str) -> Output {
     let mut out = Command::new("iqtree2");
     out.arg("-s")
         .arg(path)
-        .arg("-T")
+        .arg("-nt")
         .arg("1")
-        .arg("--prefix")
+        .arg("-pre")
         .arg(prefix)
-        .arg("--keep-ident") // Avoid identity missing issues
+        // .arg("--keep-ident") // Avoid identity missing issues
         .output()
         .expect("FAILED TO RUN IQ-TREE")
 }
@@ -437,6 +437,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn get_iqtree_version_test() {
         let version = 2;
         let path = ".";
