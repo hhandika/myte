@@ -9,9 +9,12 @@ use glob::glob;
 use indicatif::{ProgressBar, ProgressStyle};
 use rayon::prelude::*;
 
-const IQTREE_EXE: &str = "iqtree";
+const IQTREE_EXE: &str = "iqtree2";
+const ASTRAL_EXE: &str = "astral";
 const GENE_TREE_NAME: &str = "genes.treefiles";
 const ASTRAL_TREE_NAME: &str = "msc_astral.tree";
+const GENE_IQTREE_DIR: &str = "iqtree-genes";
+const GENE_TREE_DIR: &str = "gene-treefiles";
 
 pub fn build_species_tree(path: &str, params: &Option<String>) {
     let dir_path = Path::new(path);
@@ -125,8 +128,8 @@ impl Commons for MSCTree<'_> {}
 struct GeneTrees<'a> {
     path: &'a str,
     params: &'a Option<String>,
-    treedir: PathBuf,
-    parent_dir: PathBuf,
+    treedir: &'a Path,
+    parent_dir: &'a Path,
 }
 
 impl<'a> GeneTrees<'a> {
@@ -134,8 +137,8 @@ impl<'a> GeneTrees<'a> {
         Self {
             path,
             params,
-            treedir: PathBuf::from("gene-treefiles"),
-            parent_dir: PathBuf::from("iqtree-genes"),
+            treedir: Path::new(GENE_TREE_DIR),
+            parent_dir: Path::new(GENE_IQTREE_DIR),
         }
     }
 
@@ -163,8 +166,8 @@ impl<'a> GeneTrees<'a> {
 
     fn estimate_gene_tree(&self, path: &Path) {
         let prefix = path.file_stem().unwrap().to_string_lossy();
-        let iqtree = IQTree::new(self.params);
-        let out = iqtree.call_iqtree(path, &prefix);
+        let iqtree = Process::new(path, self.params);
+        let out = iqtree.run_iqtree(&prefix);
         self.check_process_success(&out, path);
         let files = self.get_iqtree_files(&prefix);
         self.organize_gene_files(&files, &prefix).unwrap();
@@ -214,48 +217,6 @@ impl<'a> GeneTrees<'a> {
     }
 }
 
-struct IQTree<'a> {
-    executable: &'a str,
-    params: &'a Option<String>,
-}
-
-impl<'a> IQTree<'a> {
-    fn new(params: &'a Option<String>) -> Self {
-        Self {
-            executable: IQTREE_EXE,
-            params,
-        }
-    }
-
-    fn call_iqtree(&self, path: &Path, prefix: &str) -> Output {
-        let mut out = Command::new(self.executable);
-        out.arg("-s").arg(path).arg("--prefix").arg(prefix);
-        self.get_thread_num(&mut out);
-        self.get_iqtree_params(&mut out);
-        out.output().expect("Failed to run IQ-Tree")
-    }
-
-    fn get_iqtree_params(&self, out: &mut Command) {
-        match self.params {
-            Some(param) => {
-                let params: Vec<&str> = param.split_whitespace().collect();
-                params.iter().for_each(|param| {
-                    out.arg(param);
-                });
-            }
-            None => {
-                out.arg("-B").arg("1000");
-            }
-        }
-    }
-
-    fn get_thread_num(&self, out: &mut Command) {
-        if self.params.is_none() {
-            out.arg("-T").arg("1");
-        }
-    }
-}
-
 struct SpeciesTree<'a> {
     path: &'a Path,
     prefix: String,
@@ -274,8 +235,8 @@ impl<'a> SpeciesTree<'a> {
     }
 
     fn estimate_species_tree(&mut self) {
-        let iqtree = IQTree::new(self.params);
-        let out = iqtree.call_iqtree(self.path, &self.prefix);
+        let iqtree = Process::new(self.path, self.params);
+        let out = iqtree.run_iqtree(&self.prefix);
         self.check_process_success(&out, self.path);
         let files = self.get_iqtree_files(&self.prefix);
         self.organize_species_files(&files)
@@ -300,7 +261,6 @@ struct ConcordFactor<'a> {
     path: &'a Path,
     outdir: PathBuf,
     prefix: String,
-    command: String,
 }
 
 impl<'a> ConcordFactor<'a> {
@@ -309,35 +269,16 @@ impl<'a> ConcordFactor<'a> {
             path,
             outdir: PathBuf::from("iqtree-CF"),
             prefix: String::from("concord"),
-            command: String::from("iqtree2"),
         }
     }
 
     fn estimate_concordance(&mut self) {
-        let cores = num_cpus::get_physical();
-        let out = self.call_iqtree(cores);
+        let iqtree = Process::new(self.path, &None);
+        let out = iqtree.run_iqtree_concord(&self.prefix);
         self.check_process_success(&out, self.path);
         let files = self.get_iqtree_files(&self.prefix);
         self.organize_cf_files(&files)
             .expect("CANNOT MOVE CONCORDANCE FACTOR RESULT FILES");
-    }
-
-    fn call_iqtree(&mut self, num_core: usize) -> Output {
-        let mut out = Command::new(&self.command);
-        out.arg("-t")
-            .arg("concat.treefile")
-            .arg("--gcf")
-            .arg(GENE_TREE_NAME)
-            .arg("-p")
-            .arg(&self.path)
-            .arg("--scf")
-            .arg("100")
-            .arg("-T")
-            .arg(num_core.to_string())
-            .arg("--prefix")
-            .arg(&self.prefix)
-            .output()
-            .expect("FAILED TO RUN IQ-TREE")
     }
 
     fn organize_cf_files(&self, files: &[PathBuf]) -> Result<()> {
@@ -354,9 +295,76 @@ impl<'a> ConcordFactor<'a> {
     }
 }
 
+struct Process<'a> {
+    path: &'a Path,
+    params: &'a Option<String>,
+}
+
+impl<'a> Process<'a> {
+    fn new(path: &'a Path, params: &'a Option<String>) -> Self {
+        Self { path, params }
+    }
+
+    fn run_iqtree(&self, prefix: &str) -> Output {
+        let mut out = Command::new(IQTREE_EXE);
+        out.arg("-s").arg(self.path).arg("--prefix").arg(prefix);
+        self.get_thread_num(&mut out);
+        self.get_iqtree_params(&mut out);
+        out.output().expect("Failed to run IQ-Tree")
+    }
+
+    fn run_iqtree_concord(&self, prefix: &str) -> Output {
+        let cores = num_cpus::get_physical();
+        let mut out = Command::new(IQTREE_EXE);
+        out.arg("-t")
+            .arg("concat.treefile")
+            .arg("--gcf")
+            .arg(GENE_TREE_NAME)
+            .arg("-p")
+            .arg(&self.path)
+            .arg("--scf")
+            .arg("100")
+            .arg("-T")
+            .arg(cores.to_string())
+            .arg("--prefix")
+            .arg(prefix)
+            .output()
+            .expect("Failed to run IQ-Tree concordance factors")
+    }
+
+    fn run_astral(&self) -> Output {
+        let mut out = Command::new(ASTRAL_EXE);
+        out.arg("-i")
+            .arg(GENE_TREE_NAME)
+            .arg("-o")
+            .arg(ASTRAL_TREE_NAME)
+            .output()
+            .expect("Failed to run Astral")
+    }
+
+    fn get_iqtree_params(&self, out: &mut Command) {
+        match self.params {
+            Some(param) => {
+                let params: Vec<&str> = param.split_whitespace().collect();
+                params.iter().for_each(|param| {
+                    out.arg(param);
+                });
+            }
+            None => {
+                out.arg("-B").arg("1000");
+            }
+        }
+    }
+
+    fn get_thread_num(&self, out: &mut Command) {
+        if self.params.is_none() {
+            out.arg("-T").arg("1");
+        }
+    }
+}
+
 struct MSCTree<'a> {
     path: &'a Path,
-    command: String,
     astral_out: String,
 }
 
@@ -364,28 +372,17 @@ impl<'a> MSCTree<'a> {
     fn new(path: &'a Path) -> Self {
         Self {
             path,
-            command: String::from("astral"),
             astral_out: String::from("astral.log"),
         }
     }
 
     fn estimate_msc_tree(&self) {
-        let out = self.call_astral();
+        let astral = Process::new(self.path, &None);
+        let out = astral.run_astral();
         self.check_process_success(&out, self.path);
         if out.status.success() {
             self.write_astral_output(&out);
         }
-    }
-
-    fn call_astral(&self) -> Output {
-        let mut out = Command::new(&self.command);
-
-        out.arg("-i")
-            .arg(GENE_TREE_NAME)
-            .arg("-o")
-            .arg(ASTRAL_TREE_NAME)
-            .output()
-            .expect("FAILED TO RUN ASTRAL")
     }
 
     fn write_astral_output(&self, out: &Output) {
