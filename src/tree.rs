@@ -29,8 +29,8 @@ pub fn build_species_tree(path: &str, params: &Option<String>) {
     spin.abandon_with_message("Finished estimating species tree!");
 }
 
-pub fn build_gene_trees(path: &str, params: &Option<String>) {
-    let mut genes = GeneTrees::new(path, params);
+pub fn build_gene_trees(path: &str, params: &Option<String>, input_fmt: &InputFmt) {
+    let mut genes = GeneTrees::new(path, params, input_fmt);
     let paths = genes.get_alignment_paths();
     assert!(
         paths.len() > 1,
@@ -115,6 +115,12 @@ trait Commons {
     }
 }
 
+pub enum InputFmt {
+    Fasta,
+    Nexus,
+    Phylip,
+}
+
 impl Commons for GeneTrees<'_> {}
 impl Commons for SpeciesTree<'_> {}
 impl Commons for ConcordFactor<'_> {}
@@ -125,21 +131,31 @@ struct GeneTrees<'a> {
     params: &'a Option<String>,
     treedir: &'a Path,
     parent_dir: &'a Path,
+    input_fmt: &'a InputFmt,
 }
 
 impl<'a> GeneTrees<'a> {
-    fn new(path: &'a str, params: &'a Option<String>) -> Self {
+    fn new(path: &'a str, params: &'a Option<String>, input_fmt: &'a InputFmt) -> Self {
         Self {
             path,
             params,
             treedir: Path::new(GENE_TREE_DIR),
             parent_dir: Path::new(GENE_IQTREE_DIR),
+            input_fmt,
         }
     }
 
     fn get_alignment_paths(&mut self) -> Vec<PathBuf> {
-        let pattern = format!("{}/*.nexus", self.path);
+        let pattern = self.get_pattern();
         self.get_files(&pattern)
+    }
+
+    fn get_pattern(&mut self) -> String {
+        match self.input_fmt {
+            InputFmt::Fasta => format!("{}/*.fa*", self.path),
+            InputFmt::Nexus => format!("{}/*.nex*", self.path),
+            InputFmt::Phylip => format!("{}/*.phy*", self.path),
+        }
     }
 
     fn print_genes_paths<P: AsRef<Path>>(&self, path: &P) -> Result<()> {
@@ -397,10 +413,12 @@ impl<'a> Process<'a> {
 mod test {
     use super::*;
 
+    const INPUT_FMT: InputFmt = InputFmt::Fasta;
+
     #[test]
     fn get_gene_paths_test() {
         let path = "test_files";
-        let mut genes = GeneTrees::new(path, &None);
+        let mut genes = GeneTrees::new(path, &None, &INPUT_FMT);
         let gene_paths = genes.get_alignment_paths();
 
         assert_eq!(2, gene_paths.len());
@@ -410,7 +428,7 @@ mod test {
     #[should_panic]
     fn gene_tree_panic_test() {
         let path = ".";
-        build_gene_trees(path, &None);
+        build_gene_trees(path, &None, &INPUT_FMT);
     }
 
     #[test]

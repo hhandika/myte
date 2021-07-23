@@ -3,7 +3,7 @@ use std::io::{self, Result, Write};
 use clap::{crate_name, App, AppSettings, Arg, ArgMatches};
 
 use crate::deps;
-use crate::tree;
+use crate::tree::{self, InputFmt};
 use crate::utils;
 
 fn get_args(version: &str) -> ArgMatches {
@@ -60,6 +60,15 @@ fn get_args(version: &str) -> ArgMatches {
                         .require_equals(true)
                         .takes_value(true)
                         .value_name("PARAMS"),
+                )
+                .arg(
+                    Arg::with_name("input-fmt")
+                        .short("f")
+                        .long("input-fmt")
+                        .help("Sets input format")
+                        .takes_value(true)
+                        .possible_values(&["fasta", "phylip", "nexus"])
+                        .value_name("PARAMS"),
                 ),
         )
         .subcommand(
@@ -105,11 +114,12 @@ fn parse_auto_cli(matches: &ArgMatches, version: &str) {
     let msg_len = 80;
     let params_s = parse_params_species(matches);
     let params_g = parse_params_gene(matches);
+    let input_fmt = parse_input_fmt(matches);
     display_app_info(version).unwrap();
     print_species_tree_header(msg_len);
     tree::build_species_tree(path, &params_s);
     print_gene_tree_header(msg_len);
-    tree::build_gene_trees(path, &params_g);
+    tree::build_gene_trees(path, &params_g, &input_fmt);
     print_cf_tree_header(msg_len);
     tree::estimate_concordance_factor(path);
     print_msc_tree_header(msg_len);
@@ -121,9 +131,10 @@ fn parse_gene_cli(matches: &ArgMatches, version: &str) {
     let path = get_path(matches);
     let msg_len = 80;
     let params = parse_params_gene(matches);
+    let input_fmt = parse_input_fmt(matches);
     display_app_info(version).unwrap();
     print_gene_tree_header(msg_len);
-    tree::build_gene_trees(path, &params);
+    tree::build_gene_trees(path, &params, &input_fmt);
     print_cf_tree_header(msg_len);
     tree::estimate_concordance_factor(path);
     print_msc_tree_header(msg_len);
@@ -160,6 +171,18 @@ fn parse_params_species(matches: &ArgMatches) -> Option<String> {
     }
 
     opts
+}
+
+fn parse_input_fmt(matches: &ArgMatches) -> InputFmt {
+    let input_fmt = matches
+        .value_of("format")
+        .expect("CANNOT READ FORMAT INPUT");
+    match input_fmt {
+        "fasta" => InputFmt::Fasta,
+        "nexus" => InputFmt::Nexus,
+        "phylip" => InputFmt::Phylip,
+        _ => unreachable!("Specify input format"),
+    }
 }
 
 fn get_path<'a>(matches: &'a ArgMatches) -> &'a str {
