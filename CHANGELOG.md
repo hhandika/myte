@@ -1,5 +1,9 @@
 # Release Notes
 
+## v0.5.0
+
+- Add log
+
 ## v0.4.0
 
 - Add multi species coalescence method using ASTRAL-MP.
