@@ -22,40 +22,24 @@ pub fn print_divider(text: &str, len: usize) {
     header.print_header().unwrap();
 }
 
-pub fn get_system_info<W: Write>(handle: &mut W) -> Result<()> {
+pub fn get_system_info() {
     let sysinfo = sysinfo::System::new_all();
     let total_ram = sysinfo.get_total_memory();
     let gb = 1048576;
 
-    writeln!(handle, "\x1b[0;33mSystem Information\x1b[0m")?;
+    log::info!("\x1b[0;33mSystem Information\x1b[0m");
 
-    writeln!(
-        handle,
+    log::info!(
         "Operating system\t: {} {}",
         get_os_name(&sysinfo),
         get_os_version(&sysinfo)
-    )?;
+    );
 
-    writeln!(
-        handle,
-        "Kernel version\t\t: {}",
-        get_kernel_version(&sysinfo)
-    )?;
-    writeln!(
-        handle,
-        "Available cores\t\t: {:?}",
-        num_cpus::get_physical()
-    )?;
-    writeln!(handle, "Available threads\t: {:?}", num_cpus::get())?;
-    writeln!(handle, "Total RAM\t\t: {} Gb", total_ram / gb)?;
-    writeln!(
-        handle,
-        "Time\t\t\t: {}",
-        Local::now().format("%Y-%m-%d %H:%M:%S")
-    )?;
-    writeln!(handle)?;
-
-    Ok(())
+    log::info!("Kernel version\t\t: {}", get_kernel_version(&sysinfo));
+    log::info!("Available cores\t\t: {:?}", num_cpus::get_physical());
+    log::info!("Available threads\t: {:?}", num_cpus::get());
+    log::info!("Total RAM\t\t: {} Gb", total_ram / gb);
+    log::info!("Time\t\t\t: {}", Local::now().format("%Y-%m-%d %H:%M:%S"));
 }
 
 fn get_os_name(sysinfo: &System) -> String {

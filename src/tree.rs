@@ -52,7 +52,7 @@ pub fn build_gene_trees(path: &str, params: &Option<String>, input_fmt: &InputFm
     );
 
     genes.create_tree_files_dir();
-    genes.print_genes_paths(&path).unwrap();
+    genes.print_genes_paths(&path);
 
     let num_alignments = paths.len();
     let msg = format!(
@@ -113,16 +113,10 @@ trait Commons {
 
     fn check_process_success(&self, out: &Output, path: &Path) {
         if !out.status.success() {
-            println!();
-            let msg = format!(
-                "\x1b[0;41mIQ-TREE FAILED TO PROCESS {}\x1b[0m\n",
-                path.to_string_lossy()
-            );
-            io::stdout().write_all(msg.as_bytes()).unwrap();
             io::stdout().write_all(&out.stdout).unwrap();
             io::stdout().write_all(&out.stderr).unwrap();
-            eprintln!(
-                "\x1b[0;41mERROR:\x1b[0m IQ-TREE failed to process {}. See the log output above.",
+            log::warn!(
+                "ERROR: IQ-TREE failed to process {} (See above).",
                 path.to_string_lossy()
             );
         }
@@ -172,11 +166,8 @@ impl<'a> GeneTrees<'a> {
         }
     }
 
-    fn print_genes_paths<P: AsRef<Path>>(&self, path: &P) -> Result<()> {
-        let stdout = io::stdout();
-        let mut handle = stdout.lock();
-        writeln!(handle, "Alignment path: {}\n", path.as_ref().display())?;
-        Ok(())
+    fn print_genes_paths<P: AsRef<Path>>(&self, path: &P) {
+        log::info!("Alignment path: {}\n", path.as_ref().display());
     }
 
     fn create_tree_files_dir(&mut self) {

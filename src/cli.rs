@@ -1,10 +1,14 @@
-use std::io::{self, Result, Write};
-
-use clap::{crate_name, App, AppSettings, Arg, ArgMatches};
+use std::io::Result;
 
 use crate::deps;
 use crate::tree::{self, InputFmt};
 use crate::utils;
+use clap::{crate_name, App, AppSettings, Arg, ArgMatches};
+use log::LevelFilter;
+use log4rs::append::console::ConsoleAppender;
+use log4rs::append::file::FileAppender;
+use log4rs::config::{Appender, Config, Root};
+use log4rs::encode::pattern::PatternEncoder;
 
 fn get_args(version: &str) -> ArgMatches {
     App::new("myte")
@@ -106,10 +110,11 @@ fn get_args(version: &str) -> ArgMatches {
 
 pub fn parse_cli(version: &str) {
     let args = get_args(version);
+    setup_logging().expect("Failed setting up a log file.");
     match args.subcommand() {
         ("auto", Some(auto_matches)) => parse_auto_cli(auto_matches, &version),
         ("gene", Some(gene_matches)) => parse_gene_cli(gene_matches, &version),
-        ("check", Some(_)) => display_app_info(&version).unwrap(),
+        ("check", Some(_)) => display_app_info(&version),
         ("deps", Some(deps_matches)) => parse_deps_cli(deps_matches),
         _ => unreachable!(),
     }
@@ -128,10 +133,12 @@ fn parse_auto_cli(matches: &ArgMatches, version: &str) {
     let params_s = parse_params_species(matches);
     let params_g = parse_params_gene(matches);
     let input_fmt = parse_input_fmt(matches);
-    display_app_info(version).unwrap();
+    display_app_info(version);
     print_species_tree_header(msg_len);
+    log_input(&path, &params_s);
     tree::build_species_tree(path, &params_s);
     print_gene_tree_header(msg_len);
+    log_input(&path, &params_g);
     tree::build_gene_trees(path, &params_g, &input_fmt);
     print_cf_tree_header(msg_len);
     tree::estimate_concordance_factor(path);
@@ -145,7 +152,7 @@ fn parse_gene_cli(matches: &ArgMatches, version: &str) {
     let msg_len = 80;
     let params = parse_params_gene(matches);
     let input_fmt = parse_input_fmt(matches);
-    display_app_info(version).unwrap();
+    display_app_info(version);
     print_gene_tree_header(msg_len);
     tree::build_gene_trees(path, &params, &input_fmt);
     print_cf_tree_header(msg_len);
@@ -222,14 +229,46 @@ fn print_msc_tree_header(len: usize) {
     utils::print_divider(text, len);
 }
 
-fn display_app_info(version: &str) -> Result<()> {
-    let io = io::stdout();
-    let mut handle = io::BufWriter::new(io);
-    writeln!(handle, "{} v{}", crate_name!(), version)?;
-    writeln!(handle, "Genomics tools for phylogenetic tree estimation")?;
-    writeln!(handle, "Developed by Heru Handika")?;
-    writeln!(handle)?;
-    utils::get_system_info(&mut handle)?;
+fn display_app_info(version: &str) {
+    log::info!("{} v{}", crate_name!(), version);
+    log::info!("Genomics tools for phylogenetic tree estimation");
+    log::info!("Developed by Heru Handika");
+    utils::get_system_info();
+}
+
+fn log_input(path: &str, params: &Option<String>) {
+    log::info!("Input\t\t: {}", path);
+    match params {
+        Some(param) => log::info!("Opt params\t: {}", param),
+        None => log::info!("Params\t\t: None"),
+    }
+}
+
+fn setup_logging() -> Result<()> {
+    let log_dir = std::env::current_dir()?;
+    let target = log_dir.join("myte.log");
+    let tofile = FileAppender::builder()
+        .encoder(Box::new(PatternEncoder::new(
+            "{d(%Y-%m-%d %H:%M:%S)} - {l} - {m}\n",
+        )))
+        .build(target)?;
+
+    let stdout = ConsoleAppender::builder()
+        .encoder(Box::new(PatternEncoder::new("{m}\n")))
+        .build();
+
+    let config = Config::builder()
+        .appender(Appender::builder().build("stdout", Box::new(stdout)))
+        .appender(Appender::builder().build("logfile", Box::new(tofile)))
+        .build(
+            Root::builder()
+                .appender("stdout")
+                .appender("logfile")
+                .build(LevelFilter::Info),
+        )
+        .unwrap();
+
+    log4rs::init_config(config).unwrap();
 
     Ok(())
 }
