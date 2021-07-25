@@ -144,7 +144,7 @@ fn parse_auto_cli(matches: &ArgMatches, version: &str) {
     tree::estimate_concordance_factor(path);
     print_msc_tree_header(msg_len);
     tree::estimate_msc_tree(path);
-    println!("\nCOMPLETED!\n");
+    print_complete();
 }
 
 fn parse_gene_cli(matches: &ArgMatches, version: &str) {
@@ -159,7 +159,7 @@ fn parse_gene_cli(matches: &ArgMatches, version: &str) {
     tree::estimate_concordance_factor(path);
     print_msc_tree_header(msg_len);
     tree::estimate_msc_tree(path);
-    println!("\nCOMPLETED!\n");
+    print_complete();
 }
 
 fn parse_astral_cli(matches: &ArgMatches) {
@@ -232,15 +232,20 @@ fn print_msc_tree_header(len: usize) {
 fn display_app_info(version: &str) {
     log::info!("{} v{}", crate_name!(), version);
     log::info!("Genomics tools for phylogenetic tree estimation");
-    log::info!("Developed by Heru Handika");
+    log::info!("Developed by Heru Handika\n");
     utils::get_system_info();
 }
 
+fn print_complete() {
+    log::info!("COMPLETED!");
+    log::info!("Please, check each program log for commands and other details!\n")
+}
+
 fn log_input(path: &str, params: &Option<String>) {
-    log::info!("Input\t\t: {}", path);
+    log::info!("{:18}: {}", "Input", path);
     match params {
-        Some(param) => log::info!("Opt params\t: {}", param),
-        None => log::info!("Params\t\t: None"),
+        Some(param) => log::info!("{:18}: {}", "Opt params", param),
+        None => log::info!("{:18}: None", "Params"),
     }
 }
 
@@ -249,7 +254,7 @@ fn setup_logging() -> Result<()> {
     let target = log_dir.join("myte.log");
     let tofile = FileAppender::builder()
         .encoder(Box::new(PatternEncoder::new(
-            "{d(%Y-%m-%d %H:%M:%S)} - {l} - {m}\n",
+            "{d(%Y-%m-%d %H:%M:%S %Z)} - {l} - {m}\n",
         )))
         .build(target)?;
 

@@ -1,5 +1,6 @@
 use std::io::{self, Result, Write};
 
+use ansi_term::Colour::Yellow;
 use chrono::{Local, NaiveTime};
 use sysinfo::{System, SystemExt};
 
@@ -13,7 +14,7 @@ fn parse_duration(duration: u64) -> String {
 
 pub fn print_formatted_duration(duration: u64) {
     let time = parse_duration(duration);
-    println!("Execution time (HH:MM:SS): {}", time);
+    log::info!("Execution time (HH:MM:SS): {}", time);
 }
 
 pub fn print_divider(text: &str, len: usize) {
@@ -27,19 +28,24 @@ pub fn get_system_info() {
     let total_ram = sysinfo.get_total_memory();
     let gb = 1048576;
 
-    log::info!("\x1b[0;33mSystem Information\x1b[0m");
+    log::info!("{}", Yellow.paint("System Information"));
 
     log::info!(
-        "Operating system\t: {} {}",
+        "{:18}: {} {}",
+        "Operating system",
         get_os_name(&sysinfo),
         get_os_version(&sysinfo)
     );
 
-    log::info!("Kernel version\t\t: {}", get_kernel_version(&sysinfo));
-    log::info!("Available cores\t\t: {:?}", num_cpus::get_physical());
-    log::info!("Available threads\t: {:?}", num_cpus::get());
-    log::info!("Total RAM\t\t: {} Gb", total_ram / gb);
-    log::info!("Time\t\t\t: {}", Local::now().format("%Y-%m-%d %H:%M:%S"));
+    log::info!("{:18}: {}", "Kernel version", get_kernel_version(&sysinfo));
+    log::info!("{:18}: {:?}", "Available cores", num_cpus::get_physical());
+    log::info!("{:18}: {:?}", "Available threads", num_cpus::get());
+    log::info!("{:18}: {} Gb", "Total RAM", total_ram / gb);
+    log::info!(
+        "{:18}: {}\n",
+        "Date and time",
+        Local::now().format("%Y-%m-%d %H:%M:%S")
+    );
 }
 
 fn get_os_name(sysinfo: &System) -> String {

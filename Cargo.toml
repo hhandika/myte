@@ -5,6 +5,7 @@ authors = ["Heru Handika <herubiolog@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+ansi_term = "0.12.1"
 clap = "2.33.*"
 chrono = "0.4.*"
 glob = "0.3.*"

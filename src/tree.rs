@@ -1,6 +1,6 @@
 use std::fs;
 use std::fs::File;
-use std::io::{self, BufWriter, Read, Result, Write};
+use std::io::{BufWriter, Read, Result, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 use std::str;
@@ -33,6 +33,7 @@ const ASTRAL_LOG_NAME: &str = "msc_astral.log";
 pub fn build_species_tree(path: &str, params: &Option<String>) {
     let dir_path = Path::new(path);
     let mut iqtree = SpeciesTree::new(&dir_path, params);
+    iqtree.print_species_info();
     let msg = format!(
         "\x1b[0mIQ-TREE is processing species tree for alignments in {}...",
         path
@@ -40,7 +41,7 @@ pub fn build_species_tree(path: &str, params: &Option<String>) {
     let spin = iqtree.set_spinner();
     spin.set_message(msg);
     iqtree.estimate_species_tree();
-    spin.abandon_with_message("Finished estimating species tree!");
+    spin.abandon_with_message("Finished estimating species tree!\n");
 }
 
 pub fn build_gene_trees(path: &str, params: &Option<String>, input_fmt: &InputFmt) {
@@ -52,12 +53,12 @@ pub fn build_gene_trees(path: &str, params: &Option<String>, input_fmt: &InputFm
     );
 
     genes.create_tree_files_dir();
-    genes.print_genes_paths(&path);
 
-    let num_alignments = paths.len();
+    let num_aln = paths.len();
+    genes.print_genes_info(&path, num_aln);
     let msg = format!(
         "\x1b[0mIQ-TREE is processing gene trees for {} alignments...",
-        num_alignments
+        num_aln
     );
 
     let spin = genes.set_spinner();
@@ -66,7 +67,7 @@ pub fn build_gene_trees(path: &str, params: &Option<String>, input_fmt: &InputFm
 
     let finish_msg = format!(
         "\x1b[0mFinished estimating gene trees for {} alignments!",
-        num_alignments
+        num_aln
     );
     spin.abandon_with_message(finish_msg);
     genes.combine_gene_trees();
@@ -75,21 +76,23 @@ pub fn build_gene_trees(path: &str, params: &Option<String>, input_fmt: &InputFm
 pub fn estimate_concordance_factor(path: &str) {
     let dir_path = Path::new(path);
     let mut iqtree = ConcordFactor::new(&dir_path);
+    iqtree.print_concord_info();
     let msg = "\x1b[0mIQ-TREE is processing concordance factor...";
     let spin = iqtree.set_spinner();
     spin.set_message(msg);
     iqtree.estimate_concordance();
-    spin.abandon_with_message("\x1b[0mFinished estimating concordance factor!");
+    spin.abandon_with_message("\x1b[0mFinished estimating concordance factor!\n");
 }
 
 pub fn estimate_msc_tree(path: &str) {
     let dir = Path::new(path);
     let mut astral = MSCTree::new(&dir);
+    astral.print_msc_info();
     let msg = "\x1b[0mASTRAL is processing MSC tree...";
     let spin = astral.set_spinner();
     spin.set_message(msg);
     astral.estimate_msc_tree();
-    spin.abandon_with_message("\x1b[0mFinished estimating MSC tree!");
+    spin.abandon_with_message("\x1b[0mFinished estimating MSC tree!\n");
 }
 
 trait Commons {
@@ -113,8 +116,8 @@ trait Commons {
 
     fn check_process_success(&self, out: &Output, path: &Path) {
         if !out.status.success() {
-            io::stdout().write_all(&out.stdout).unwrap();
-            io::stdout().write_all(&out.stderr).unwrap();
+            log::warn!("{}", std::str::from_utf8(&out.stdout).unwrap());
+            log::warn!("{}", std::str::from_utf8(&out.stderr).unwrap());
             log::warn!(
                 "ERROR: IQ-TREE failed to process {} (See above).",
                 path.to_string_lossy()
@@ -166,8 +169,11 @@ impl<'a> GeneTrees<'a> {
         }
     }
 
-    fn print_genes_paths<P: AsRef<Path>>(&self, path: &P) {
-        log::info!("Alignment path: {}\n", path.as_ref().display());
+    fn print_genes_info<P: AsRef<Path>>(&self, path: &P, aln_size: usize) {
+        log::info!("{:18}: {}", "Alignment path", path.as_ref().display());
+        log::info!("{:18}: {}", "File counts", aln_size);
+        log::info!("{:18}: Iqtree", "Analyses");
+        log::info!("{:18}: {}\n", "Executable", IQTREE_EXE);
     }
 
     fn create_tree_files_dir(&mut self) {
@@ -220,7 +226,7 @@ impl<'a> GeneTrees<'a> {
         trees
             .iter()
             .for_each(|tree| self.write_trees(&mut treefile, tree));
-        let finish_msg = format!("Finished combining {} gene trees!", num_trees);
+        let finish_msg = format!("Finished combining {} gene trees!\n", num_trees);
         spin.finish_with_message(finish_msg);
     }
 
@@ -257,6 +263,11 @@ impl<'a> SpeciesTree<'a> {
         let files = iqtree.get_iqtree_files(&self.prefix);
         self.organize_species_files(&files)
             .expect("FAILED TO MOVE SPECIES TREE RESULT FILES");
+    }
+
+    fn print_species_info(&self) {
+        log::info!("{:18}: Species tree", "Analyses");
+        log::info!("{:18}: {}\n", "Executable", IQTREE_EXE);
     }
 
     fn organize_species_files(&self, files: &[PathBuf]) -> Result<()> {
@@ -297,6 +308,11 @@ impl<'a> ConcordFactor<'a> {
             .expect("CANNOT MOVE CONCORDANCE FACTOR RESULT FILES");
     }
 
+    fn print_concord_info(&self) {
+        log::info!("{:18}: Gene and site concordance factors", "Analyses");
+        log::info!("{:18}: {}\n", "Executable", IQTREE_EXE);
+    }
+
     fn organize_cf_files(&self, files: &[PathBuf]) -> Result<()> {
         fs::create_dir_all(&self.outdir)?;
         files.iter().for_each(|file| {
@@ -331,6 +347,11 @@ impl<'a> MSCTree<'a> {
         if out.status.success() {
             self.write_astral_output(&out);
         }
+    }
+
+    fn print_msc_info(&self) {
+        log::info!("{:18}: MSC", "Analyses");
+        log::info!("{:18}: {}\n", "Executable", ASTRAL_EXE);
     }
 
     fn write_astral_output(&self, out: &Output) {
