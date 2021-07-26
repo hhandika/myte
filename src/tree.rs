@@ -1,6 +1,7 @@
 use std::fs;
 use std::fs::File;
 use std::io::{BufWriter, Read, Result, Write};
+use std::panic;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 use std::str;
@@ -50,9 +51,10 @@ pub fn build_gene_trees(path: &str, params: &Option<String>, input_fmt: &InputFm
     let paths = genes.get_alignment_paths();
     assert!(
         paths.len() > 1,
-        "LESS THAN ONE ALIGNMENT FOUND FOR GENE TREE ANALYSES"
+        panic::set_hook(Box::new(|_| {
+            log::error!("Ups... Failed to process file. Less than one alignment found");
+        }))
     );
-
     genes.create_tree_files_dir();
 
     let num_aln = paths.len();
@@ -117,13 +119,13 @@ trait Commons {
 
     fn check_process_success(&self, out: &Output, path: &Path) {
         if !out.status.success() {
-            log::warn!(
+            log::error!(
                 "{}: IQ-TREE failed to process {} (See below).",
                 White.on(Red).paint("ERROR"),
                 path.to_string_lossy()
             );
-            log::warn!("{}", std::str::from_utf8(&out.stdout).unwrap());
-            log::warn!("{}", std::str::from_utf8(&out.stderr).unwrap());
+            log::error!("{}", std::str::from_utf8(&out.stdout).unwrap());
+            log::error!("{}", std::str::from_utf8(&out.stderr).unwrap());
         }
     }
 }
