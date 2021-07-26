@@ -16,3 +16,5 @@ num_cpus = "1.13.*"
 rayon = "1.5.*"
 sysinfo = "0.16.*"
 
+[profile.release]
+panic = "abort"

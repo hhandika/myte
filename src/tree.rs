@@ -51,12 +51,9 @@ pub fn build_gene_trees(path: &str, params: &Option<String>, input_fmt: &InputFm
     let paths = genes.get_alignment_paths();
     assert!(
         paths.len() > 1,
-        panic::set_hook(Box::new(|_| {
-            log::error!("Ups... Failed to process file. Less than one alignment found");
-        }))
+        "Ups... Failed to process file. Less than one alignment found"
     );
     genes.create_tree_files_dir();
-
     let num_aln = paths.len();
     genes.print_genes_info(&path, num_aln);
     let msg = format!(
