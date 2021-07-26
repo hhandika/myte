@@ -5,6 +5,7 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 use std::str;
 
+use ansi_term::Colour::{Red, White};
 use glob::glob;
 use indicatif::{ProgressBar, ProgressStyle};
 use rayon::prelude::*;
@@ -116,12 +117,13 @@ trait Commons {
 
     fn check_process_success(&self, out: &Output, path: &Path) {
         if !out.status.success() {
-            log::warn!("{}", std::str::from_utf8(&out.stdout).unwrap());
-            log::warn!("{}", std::str::from_utf8(&out.stderr).unwrap());
             log::warn!(
-                "ERROR: IQ-TREE failed to process {} (See above).",
+                "{}: IQ-TREE failed to process {} (See below).",
+                White.on(Red).paint("ERROR"),
                 path.to_string_lossy()
             );
+            log::warn!("{}", std::str::from_utf8(&out.stdout).unwrap());
+            log::warn!("{}", std::str::from_utf8(&out.stderr).unwrap());
         }
     }
 }
