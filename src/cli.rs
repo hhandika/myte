@@ -1,7 +1,15 @@
+use std::io::Result;
+
 use crate::deps;
 use crate::tree::{self, InputFmt};
 use crate::utils;
 use clap::{crate_name, App, AppSettings, Arg, ArgMatches};
+
+use log::LevelFilter;
+use log4rs::append::console::ConsoleAppender;
+use log4rs::append::file::FileAppender;
+use log4rs::config::{Appender, Config, Root};
+use log4rs::encode::pattern::PatternEncoder;
 
 fn get_args(version: &str) -> ArgMatches {
     App::new("myte")
@@ -103,6 +111,7 @@ fn get_args(version: &str) -> ArgMatches {
 
 pub fn parse_cli(version: &str) {
     let args = get_args(version);
+    setup_logger().expect("Failed setting up a log file.");
     match args.subcommand() {
         ("auto", Some(auto_matches)) => parse_auto_cli(auto_matches, &version),
         ("gene", Some(gene_matches)) => parse_gene_cli(gene_matches, &version),
@@ -239,4 +248,33 @@ fn log_input(path: &str, params: &Option<String>) {
         Some(param) => log::info!("{:18}: {}", "Opt params", param),
         None => log::info!("{:18}: None", "Params"),
     }
+}
+
+fn setup_logger() -> Result<()> {
+    let log_dir = std::env::current_dir()?;
+    let target = log_dir.join("myte.log");
+    let tofile = FileAppender::builder()
+        .encoder(Box::new(PatternEncoder::new(
+            "{d(%Y-%m-%d %H:%M:%S %Z)} - {l} - {m}\n",
+        )))
+        .build(target)?;
+
+    let stdout = ConsoleAppender::builder()
+        .encoder(Box::new(PatternEncoder::new("{m}\n")))
+        .build();
+
+    let config = Config::builder()
+        .appender(Appender::builder().build("stdout", Box::new(stdout)))
+        .appender(Appender::builder().build("logfile", Box::new(tofile)))
+        .build(
+            Root::builder()
+                .appender("stdout")
+                .appender("logfile")
+                .build(LevelFilter::Info),
+        )
+        .unwrap();
+
+    log4rs::init_config(config).unwrap();
+
+    Ok(())
 }
