@@ -35,11 +35,13 @@ jobs:
       - name: Build
         run: cargo build --release
 
-      - name: Upload binaries to artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: ${{ matrix.asset_name }}
-          path: ${{ matrix.artifact_name }}
+      - name: Package
+        run: tar -czvf ${{ matrix.asset_name }} ${{ matrix.artifact_name }}
+      # - name: Upload binaries to artifact
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: ${{ matrix.asset_name }}
+      #     path: ${{ matrix.artifact_name }}
 
       - name: Release
         uses: softprops/action-gh-release@v1

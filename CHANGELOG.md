@@ -1,5 +1,9 @@
 # Release Notes
 
+## v0.5.1
+
+- Fix CI issues.
+
 ## v0.5.0
 
 - Add log
