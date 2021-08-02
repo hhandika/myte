@@ -1,5 +1,9 @@
 # Release Notes
 
+## v0.5.2
+
+- Update CI names.
+
 ## v0.5.1
 
 - Fix CI issues.
