@@ -1,5 +1,9 @@
 # Release Notes
 
+## v0.5.5
+
+- Fix release issues.
+
 ## v0.5.4
 
 - Fix CI issues.
