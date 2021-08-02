@@ -1,8 +1,12 @@
 # Release Notes
 
+## v0.5.4
+
+- Fix CI issues.
+
 ## v0.5.3
 
-- Still trying to fix CI issue
+- Still trying to fix CI issues.
 
 ## v0.5.2
 
@@ -14,7 +18,7 @@
 
 ## v0.5.0
 
-- Add log
+- Add log.
 
 ## v0.4.0
 
