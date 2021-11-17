@@ -26,8 +26,15 @@ OS support:
 Dependencies:
 
 1. [IQ-TREE](http://www.iqtree.org/)
+2. [Astral](https://github.com/smirarab/ASTRAL) (optional)
 
-You can also compile from source. See [segul](https://github.com/hhandika/segul) readme for details instruction on how to install a command line application written in Rust.
+To check if the app can detect the dependencies:
+
+```Bash
+myte check
+```
+
+See [segul](https://github.com/hhandika/segul) readme for details instruction on how to install a command line application written in Rust.
 
 ### Compile from source
 
