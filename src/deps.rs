@@ -29,6 +29,7 @@ pub fn check_dependencies() {
     log::info!("Dependencies:");
     check_iqtree();
     check_astral();
+    println!();
 }
 
 fn make_astral_executable(fname: &str) {
