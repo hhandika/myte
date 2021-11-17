@@ -3,21 +3,11 @@
 ![myte-tests](https://github.com/hhandika/myte/workflows/myte-tests/badge.svg)
 [![Build Status](https://www.travis-ci.com/hhandika/myte.svg?branch=main)](https://www.travis-ci.com/hhandika/myte)
 
-A tool for phylogenomic tree building
-
-Current goal:
-
-Estimate species tree, gene trees, gene concordance factor, site concordance factor, and organize resulting files using a single command:
+A tool for phylogenomic tree building. The program estimates species tree, gene trees, gene concordance factor, site concordance factor, and organize resulting files using a single command:
 
 ```{Bash}
 myte auto -d [gene-alignment-folder]
 ```
-
-Future goals:
-
-1. Incorporate multi-species coalescence analyses in the pipeline.
-2. Other tools useful for genomic tree estimation. The goal is to take advantage of Rust performance (identical to C/C++) to re-write typical genomic tasks that are inefficient to do in interpreted languages, such as Python, R, Perl, etc.
-
 
 <p align="center">
  <img src="static/interface.png" width="500" >
@@ -28,8 +18,6 @@ Future goals:
 
 `myte` is a single executable command line app. The executable file will be available in the release [link](https://github.com/hhandika/myte/releases). Copy it to the folder that is registered in your PATH variable.
 
-__Comments__: I will update this instruction once the program has complete planned features.
-
 OS support:
 
 1. MacOS
@@ -39,6 +27,8 @@ OS support:
 Dependencies: 
 
 1. [IQ-TREE](http://www.iqtree.org/)
+
+You can also compile from source. See [segul](https://github.com/hhandika/segul) readme for details instruction on how to install a command line application written in Rust.
 
 ### Compile from source
 
