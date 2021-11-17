@@ -13,7 +13,6 @@ myte auto -d [gene-alignment-folder]
  <img src="static/interface.png" width="500" >
 </p>
 
-
 ## Installation
 
 `myte` is a single executable command line app. The executable file will be available in the release [link](https://github.com/hhandika/myte/releases). Copy it to the folder that is registered in your PATH variable.
@@ -26,15 +25,9 @@ OS support:
 
 Dependencies:
 
-1. [IQ-TREE2](http://www.iqtree.org/)
+1. [IQ-TREE](http://www.iqtree.org/)
 
-The program auto detect the iqtree2 binary. You can check dependecies issues by using this command:
-
-```Bash
-myte checkmy
-```
-
-See [segul](https://github.com/hhandika/segul) readme for details instruction on how to install a command line application written in Rust.
+You can also compile from source. See [segul](https://github.com/hhandika/segul) readme for details instruction on how to install a command line application written in Rust.
 
 ### Compile from source
 
