@@ -12,8 +12,8 @@ use indicatif::{ProgressBar, ProgressStyle};
 use rayon::prelude::*;
 
 // Executable file name
-const IQTREE_EXE: &str = "iqtree2";
-const ASTRAL_EXE: &str = "astral";
+pub const IQTREE_EXE: &str = "iqtree2";
+pub const ASTRAL_EXE: &str = "astral.sh";
 
 // Directories and filenames for species tree estimation
 const SPECIES_TREE_PREFIX: &str = "concat";

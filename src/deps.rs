@@ -6,13 +6,15 @@ use std::str;
 
 use regex::Regex;
 
+use crate::tree::{ASTRAL_EXE, IQTREE_EXE};
+
 pub fn fix_astral_dependency(path: &str) {
-    let fname = "astral";
+    let fname = "astral.sh";
     let jar_path = Path::new(path);
     let jar_full_path = jar_path
         .canonicalize()
         .expect("CANNOT CREATE FULL PATH TO ASTRAL JAR FILE");
-    let mut file = File::create(fname).expect("CANNOT CREATE AN ASTRAL EXECUTABLE");
+    let mut file = File::create(&fname).expect("CANNOT CREATE AN ASTRAL EXECUTABLE");
     writeln!(file, "#!/bin/bash").unwrap();
     writeln!(
         file,
@@ -22,7 +24,7 @@ pub fn fix_astral_dependency(path: &str) {
     )
     .expect("CANNOT WRITE ASTRAL EXECUTABLE");
 
-    make_astral_executable(fname);
+    make_astral_executable(&fname);
 }
 
 pub fn check_dependencies() {
@@ -41,7 +43,7 @@ fn make_astral_executable(fname: &str) {
 }
 
 fn check_iqtree() {
-    let out = Command::new("iqtree2").arg("--version").output();
+    let out = Command::new(IQTREE_EXE).arg("--version").output();
 
     match out {
         Ok(out) => {
@@ -59,10 +61,10 @@ fn check_iqtree() {
 }
 
 fn check_astral() {
-    let out = Command::new("astral").arg("--version").output();
+    let out = Command::new(ASTRAL_EXE).arg("--version").output();
 
     match out {
-        Ok(out) => log::info!("[OK]\t{}", str::from_utf8(&out.stdout).unwrap().trim()),
+        Ok(_) => log::info!("{:18}: ASTRAL", "[OK]"),
         Err(_) => log::info!("{:18}: {}", "[NOT FOUND]", "ASTRAL"),
     }
 }
