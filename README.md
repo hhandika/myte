@@ -46,8 +46,6 @@ cargo build --release
 
 Your executable will be available at `/target/release/myte`. Copy it to the folder that is registered in your PATH variable.
 
-__Notes__: The program may failed to run in outdated HPC OS due to GLIBC errors. The solution is to compile it to fully static binary using `musl` compiler. See instruction [here](https://doc.rust-lang.org/edition-guide/rust-2018/platform-and-target-support/musl-support-for-fully-static-binaries.html). Then, to build the binary `cargo build --release --target x86_64-unknown-linux-musl`
-
 ## Usages
 
 ```{Bash}
