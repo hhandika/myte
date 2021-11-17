@@ -22,6 +22,7 @@ log4rs = "1.0.0"
 num_cpus = "1.13.*"
 rayon = "1.*"
 sysinfo = "0.16.*"
+regex = "1.*"
 
 [profile.release]
 panic = "abort"

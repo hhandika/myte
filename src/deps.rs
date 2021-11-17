@@ -2,6 +2,9 @@ use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 use std::process::Command;
+use std::str;
+
+use regex::Regex;
 
 pub fn fix_astral_dependency(path: &str) {
     let fname = "astral";
@@ -22,6 +25,12 @@ pub fn fix_astral_dependency(path: &str) {
     make_astral_executable(fname);
 }
 
+pub fn check_dependencies() {
+    log::info!("Dependencies:");
+    check_iqtree();
+    check_astral();
+}
+
 fn make_astral_executable(fname: &str) {
     Command::new("chmod")
         .arg("+x")
@@ -30,42 +39,29 @@ fn make_astral_executable(fname: &str) {
         .expect("CANNOT EXECUTE chmod");
 }
 
-pub fn check_dependencies() -> Result<()> {
-    let stdout = io::stdout();
-    let mut handle = io::BufWriter::new(stdout);
-    utils::get_system_info().unwrap();
-    writeln!(handle, "Dependencies:")?;
-    check_fastp(&mut handle)?;
-    check_spades(&mut handle)?;
-    writeln!(handle)?;
-    Ok(())
-}
-
-fn check_fastp<W: Write>(handle: &mut W) -> Result<()> {
-    let out = Command::new("fastp").arg("--version").output();
+fn check_iqtree() {
+    let out = Command::new("iqtree2").arg("--version").output();
 
     match out {
-        Ok(out) => writeln!(
-            handle,
-            "[OK]\t{}",
-            str::from_utf8(&out.stderr).unwrap().trim()
-        )?,
-        Err(_) => writeln!(handle, "\x1b[0;41m[NOT FOUND]\x1b[0m\tfastp")?,
+        Ok(out) => {
+            let output = str::from_utf8(&out.stdout).unwrap().trim();
+            let re = Regex::new(r"(\d+\.)?(\d+\.)?(\*|\d+)")
+                .expect("Failed to setup regular expression for version numbers.");
+            let version = re
+                .find(output)
+                .expect("Cannot capture version in the stdout iqtree")
+                .as_str();
+            log::info!("{:18}: IQ-TREE v{}", "[OK]", version)
+        }
+        Err(_) => log::info!("{:18}: {}", "\x1b[0;41m[NOT FOUND]\x1b[0m", "IQ-TREE"),
     }
-
-    Ok(())
 }
 
-// fn check_spades<W: Write>(handle: &mut W) -> Result<()> {
-//     let out = Command::new("spades.py").arg("--version").output();
-//     match out {
-//         Ok(out) => writeln!(
-//             handle,
-//             "[OK]\t{}",
-//             str::from_utf8(&out.stdout).unwrap().trim()
-//         )?,
-//         Err(_) => writeln!(handle, "\x1b[0;41m[NOT FOUND]\x1b[0m\tSPAdes")?,
-//     }
+fn check_astral() {
+    let out = Command::new("astral").arg("--version").output();
 
-//     Ok(())
-// }
+    match out {
+        Ok(out) => log::info!("[OK]\t{}", str::from_utf8(&out.stdout).unwrap().trim()),
+        Err(_) => log::info!("{:18}: {}", "[NOT FOUND]", "ASTRAL"),
+    }
+}

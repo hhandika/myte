@@ -235,6 +235,7 @@ fn display_app_info(version: &str) {
     log::info!("Genomics tools for phylogenetic tree estimation");
     log::info!("Developed by Heru Handika\n");
     utils::get_system_info();
+    deps::check_dependencies();
 }
 
 fn print_complete() {
