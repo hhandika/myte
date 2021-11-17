@@ -3,9 +3,16 @@ name = "myte"
 version = "0.5.6"
 authors = ["Heru Handika <herubiolog@gmail.com>"]
 edition = "2018"
+license = "MIT"
+description = "A tool for phylogenomic tree building"
+readme = "README.md"
+homepage = "https://github.com/hhandika/myte"
+repository = "https://github.com/hhandika/myte"
+keywords = ["cli", "utility", "phylogenetics", "genomics", "phylogenomics"]
+categories = ["command-line-utilities", "science"]
 
 [dependencies]
-ansi_term = "0.12.1"
+ansi_term = "0.12.*"
 clap = "2.33.*"
 chrono = "0.4.*"
 glob = "0.3.*"
@@ -13,7 +20,7 @@ indicatif = "0.16.*"
 log = "0.4.14"
 log4rs = "1.0.0"
 num_cpus = "1.13.*"
-rayon = "1.5.*"
+rayon = "1.*"
 sysinfo = "0.16.*"
 
 [profile.release]
