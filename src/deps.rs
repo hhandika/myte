@@ -29,3 +29,43 @@ fn make_astral_executable(fname: &str) {
         .spawn()
         .expect("CANNOT EXECUTE chmod");
 }
+
+pub fn check_dependencies() -> Result<()> {
+    let stdout = io::stdout();
+    let mut handle = io::BufWriter::new(stdout);
+    utils::get_system_info().unwrap();
+    writeln!(handle, "Dependencies:")?;
+    check_fastp(&mut handle)?;
+    check_spades(&mut handle)?;
+    writeln!(handle)?;
+    Ok(())
+}
+
+fn check_fastp<W: Write>(handle: &mut W) -> Result<()> {
+    let out = Command::new("fastp").arg("--version").output();
+
+    match out {
+        Ok(out) => writeln!(
+            handle,
+            "[OK]\t{}",
+            str::from_utf8(&out.stderr).unwrap().trim()
+        )?,
+        Err(_) => writeln!(handle, "\x1b[0;41m[NOT FOUND]\x1b[0m\tfastp")?,
+    }
+
+    Ok(())
+}
+
+// fn check_spades<W: Write>(handle: &mut W) -> Result<()> {
+//     let out = Command::new("spades.py").arg("--version").output();
+//     match out {
+//         Ok(out) => writeln!(
+//             handle,
+//             "[OK]\t{}",
+//             str::from_utf8(&out.stdout).unwrap().trim()
+//         )?,
+//         Err(_) => writeln!(handle, "\x1b[0;41m[NOT FOUND]\x1b[0m\tSPAdes")?,
+//     }
+
+//     Ok(())
+// }

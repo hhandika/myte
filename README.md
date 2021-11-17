@@ -24,11 +24,17 @@ OS support:
 2. Linux
 3. Windows-WSL
 
-Dependencies: 
+Dependencies:
 
-1. [IQ-TREE](http://www.iqtree.org/)
+1. [IQ-TREE2](http://www.iqtree.org/)
 
-You can also compile from source. See [segul](https://github.com/hhandika/segul) readme for details instruction on how to install a command line application written in Rust.
+The program auto detect the iqtree2 binary. You can check dependecies issues by using this command:
+
+```Bash
+myte checkmy
+```
+
+See [segul](https://github.com/hhandika/segul) readme for details instruction on how to install a command line application written in Rust.
 
 ### Compile from source
 
@@ -86,8 +92,3 @@ To generate gene trees:
 ```{Bash}
 myte gene -d [alignment-folder]
 ```
-
-### Feature planned
-
-1. Allow costum parameters for IQ-TREE.
-2. Neater terminal output.
