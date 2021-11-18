@@ -63,6 +63,24 @@ cargo build --release
 
 Your executable will be available at `/target/release/myte`. Copy it to the folder that is registered in your PATH variable.
 
+### Fixing dependencies
+
+The program detects `iqtree2` installation from the environment path variable. If the program fails to detect IQ-TREE, make sure the executable is called `iqtree2` (no spaces) and the directory where you put the IQ-TREE executable is registered to your environment path variable.
+
+For Astral installation, the app can help solve the Astral dependency. Go to the folder where you install Astral. Then, use this command to solve the dependency:
+
+```Bash
+myte deps astral -j [path-to-astral-jar-file]
+```
+
+It will generate an executable file named `astral.sh`. Put the `astral.sh` file in a directory that is regiestered in your environment variable.
+
+Try to check the dependencies again:
+
+```Bash
+myte check
+```
+
 ## Usages
 
 ```{Bash}

@@ -4,8 +4,10 @@
 
 - Allow for checking dependencies issues.
 - Only run gene tree estimation for the gene tree subcommand.
+- Fix issues in creating an executable file for Astral on MacOS.
 - More consistent terminal output.
-- Cleaner help messages
+- Cleaner help messages.
+- More consistent error messages.
 
 ## v0.5.6
 
