@@ -9,6 +9,17 @@ A tool for phylogenomic tree building. The program estimates species tree, gene 
 myte auto -d [gene-alignment-folder]
 ```
 
+Similar functions can be achieved using a Bash script running GNU parallel. Our solution, however, carries some benefits:
+
+1. No coding skills needed. The app is single executable command line app. The way it is designed omits the need to change the code.
+2. Allow for reproducibility. All changes in the app were tracked using git workflow. It also generate a log file when running.
+3. Flexible. The app lets users to specifies the analysis parameters. The app design allows current and future parameters in the IQ-TREE and Astral.
+4. Low overhead. It is written in a high-performance programming language with low ram and cpu usages.
+5. Safe parallel processing. It takes the advantages of the Rust programming language parallel computing algorithms that forbid data races.
+
+Limitation:
+The app does not yet support MPI. It is designed to run in a desktop computer and take advantages all the available cores in it when possible. It should work in a cluster computer just fine, but will be limited to a single CPU in a single node.
+
 <p align="center">
  <img src="static/interface.png" width="500" >
 </p>
@@ -72,6 +83,8 @@ SUBCOMMANDS:
 
 ### Auto estimate species and gene trees and concordance factors
 
+This idea behind this feature is to run all the common analyses for phylogenomic tree estimation using a desktop computer. If you have access to a cluster computer, you could also separately run species tree analyses, gene and site concordance factors, and Astral MSC phylogenetic estimation. Only use this program to run gene tree analyes in parallel ([see below](#estimate-gene-trees-from-a-directory-of-gene-alignments)).
+
 ```{Bash}
 myte auto -d [alignment-folder]
 ```
@@ -82,7 +95,15 @@ For species tree estimation, the default option will run IQ-TREE using this comm
 iqtree2 -s ../genes/ --prefix concat -T 1 -B 1000
 ```
 
-You can specify the species tree command using option `opts-s=`
+For gene tree estimation, the default option will run IQ-TREE using this command:
+
+```Bash
+iqtree2 -s [alignment-path] --prefix [gene-names] -T 1
+```
+
+The app allow any current and future available parameters on IQ-TREE for species tree and gene tree estimation.
+
+You can specify IQ-TREE parameters for the species tree using option `opts-s=`. 
 
 For example
 
@@ -90,17 +111,11 @@ For example
 myte auto -d genes/ opts-s="-T 4 -bnni -B 1000"
 ```
 
-For gene tree estimation, the default option will run IQ-TREE using this command:
+Similar to species tree estimation, you can specify any IQ-TREE parameters using the `opts-g=` option in the app.
 
-```Bash
-iqtree2 -s [alignment-path] --prefix [gene-names] -T 1
-```
+### Estimate gene trees from a directory of gene alignments
 
-Similar to species tree estimation, you can specify any parameters available for IQ-TREE using the `opts-g=` option in the app.
-
-### Build gene trees from a directory of gene alignments
-
-The program will create multiple instances of IQ-TREE to run gene tree estimation in parallel. The program assess available cpu resources in your system and does it sensibly. In a simple word, it won't slow down your computer despite using all your cpu cores. Hence, it can be used on a personal computer without interferring your other work.
+The program will create multiple instances of IQ-TREE to run gene tree estimation in parallel. The program assess available cpu resources in your system and does it sensibly.
 
 To generate gene trees:
 
