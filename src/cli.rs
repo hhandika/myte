@@ -20,7 +20,7 @@ fn get_args(version: &str) -> ArgMatches {
         .subcommand(App::new("check").about("Check dependencies"))
         .subcommand(
             App::new("gene")
-                .about("Batch gene tree estimation using IQ-Tree")
+                .about("Multi-core gene tree estimation using IQ-Tree")
                 .arg(
                     Arg::with_name("dir")
                         .short("d")
@@ -34,18 +34,8 @@ fn get_args(version: &str) -> ArgMatches {
                         .long("opts-g")
                         .help("Inputs params for IQ-TREE gene tree analyses")
                         .takes_value(true)
-                        .value_name("PARAMS"),
-                )
-                .arg(
-                    Arg::with_name("input-fmt")
-                        .short("f")
-                        .long("input-fmt")
-                        .help("Sets input format")
-                        .required(true)
-                        .takes_value(true)
-                        .default_value("nexus")
-                        .possible_values(&["fasta", "phylip", "nexus"])
-                        .value_name("PARAMS"),
+                        .value_name("PARAMS")
+                        .default_value("-T 1"),
                 ),
         )
         .subcommand(
@@ -75,18 +65,8 @@ fn get_args(version: &str) -> ArgMatches {
                         .help("Inputs params for IQ-TREE gene tree analyses")
                         .require_equals(true)
                         .takes_value(true)
-                        .value_name("PARAMS"),
-                )
-                .arg(
-                    Arg::with_name("input-fmt")
-                        .short("f")
-                        .long("input-fmt")
-                        .help("Sets input format")
-                        .required(true)
-                        .takes_value(true)
-                        .default_value("nexus")
-                        .possible_values(&["fasta", "phylip", "nexus"])
-                        .value_name("PARAMS"),
+                        .value_name("PARAMS")
+                        .default_value("-T 1"),
                 ),
         )
         .subcommand(
