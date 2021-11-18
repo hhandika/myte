@@ -1,5 +1,9 @@
 # Release Notes
 
+## v0.6.1
+
+- Fix version number errors.
+
 ## v0.6.0
 
 - Allow for checking dependencies issues.

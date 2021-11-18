@@ -14,12 +14,13 @@ myte auto -d [gene-alignment-folder]
 Similar functions can be achieved using a Bash script running GNU parallel. Our solution, however, carries some benefits:
 
 1. No coding skills needed. The app is a single executable command line app. The way it is designed omits the need to change the code.
-2. Allow for reproducibility. All changes in the app were tracked using git workflow. It also generate a log file when running.
+2. Allow for reproducibility. All changes in the app are tracked using git workflow. It also generate a log file when running.
 3. Flexible. The app lets users to specify the analysis parameters. The app design allows current and future parameters available in the IQ-TREE and Astral.
 4. Low overhead. It is written in a high-performance programming language with low ram and cpu usages.
 5. Safe parallel processing. It takes the advantages of the Rust programming language parallel computing algorithms that avoid data races.
 
 Limitation:
+
 The app does not yet support MPI. It is designed to run in a desktop computer and take advantage of all the available cores in it when possible. It should work in a cluster computer just fine, but will be limited to a single CPU in a single node.
 
 <p align="center">
