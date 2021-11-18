@@ -158,10 +158,6 @@ fn parse_gene_cli(matches: &ArgMatches, version: &str) {
     display_app_info(version);
     print_gene_tree_header(msg_len);
     tree::build_gene_trees(path, &params, &input_fmt);
-    print_cf_tree_header(msg_len);
-    tree::estimate_concordance_factor(path);
-    print_msc_tree_header(msg_len);
-    tree::estimate_msc_tree(path);
     print_complete();
 }
 
