@@ -30,11 +30,19 @@ The app does not yet support MPI. It is designed to run in a desktop computer an
 
 `myte` is a single executable command line app. The executable file will be available in the release [link](https://github.com/hhandika/myte/releases). Copy it to the folder that is registered in your PATH variable.
 
+You can also install the app using the Rust package manager cargo:
+
+```Bash
+cargo install myte
+```
+
 OS support:
 
 1. MacOS
 2. Linux
 3. Windows-WSL
+
+>__Note__: We provide Apple Arm64 executable for MacOS. `myte` will run native on Apple Arm64 CPUs (M1 series). However, due to IQ-TREE suported CPU architecture limitation, IQ-TREE will run on the Apple Rosetta emulator.
 
 Dependencies:
 
