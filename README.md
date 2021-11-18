@@ -55,10 +55,6 @@ Your executable will be available at `/target/release/myte`. Copy it to the fold
 ## Usages
 
 ```{Bash}
-myte 0.3.2
-Heru Handika
-A tool for phylogenomic tree building
-
 USAGE:
     myte <SUBCOMMAND>
 
@@ -69,13 +65,10 @@ FLAGS:
 SUBCOMMANDS:
     auto     Auto estimate species tree, gene trees, and gene and site concordance factor
     check    Check dependencies
-    gene     Batch gene tree estimation using IQ-Tree
+    deps     Solves dependency issues
+    gene     Multi-core gene tree estimation using IQ-Tree
     help     Prints this message or the help of the given subcommand(s)
 ```
-
-## Status of the Code
-
-The code is still at infancy. Working features:
 
 ### Auto estimate species and gene trees and concordance factors
 

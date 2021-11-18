@@ -151,15 +151,10 @@ fn parse_astral_cli(matches: &ArgMatches) {
 }
 
 fn parse_params_gene(matches: &ArgMatches) -> Option<String> {
-    let mut opts = None;
-    if matches.is_present("opts-g") {
-        let input = matches
-            .value_of("opts-g")
-            .expect("CANNOT PARSE PARAMS INPUT");
-        opts = Some(String::from(input.trim()));
-    }
-
-    opts
+    let input = matches
+        .value_of("opts-g")
+        .expect("CANNOT PARSE PARAMS INPUT");
+    Some(String::from(input.trim()))
 }
 
 fn parse_params_species(matches: &ArgMatches) -> Option<String> {

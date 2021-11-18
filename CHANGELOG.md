@@ -1,5 +1,14 @@
 # Release Notes
 
+## v0.6.0
+
+- Allow for checking dependencies issues.
+- More consistent terminal output.
+
+## v0.5.6
+
+- Bug fixes.
+
 ## v0.5.5
 
 - Fix release issues.
