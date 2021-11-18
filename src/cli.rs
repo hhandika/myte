@@ -34,8 +34,19 @@ fn get_args(version: &str) -> ArgMatches {
                         .long("opts-g")
                         .help("Inputs params for IQ-TREE gene tree analyses")
                         .takes_value(true)
-                        .value_name("PARAMS")
+                        .value_name("STRING")
                         .default_value("-T 1"),
+                )
+                .arg(
+                    Arg::with_name("input-fmt")
+                        .short("f")
+                        .long("input-fmt")
+                        .help("Sets input format")
+                        .required(true)
+                        .takes_value(true)
+                        .default_value("nexus")
+                        .possible_values(&["fasta", "phylip", "nexus"])
+                        .value_name("ALIGNMENT-FORMAT"),
                 ),
         )
         .subcommand(
@@ -49,7 +60,7 @@ fn get_args(version: &str) -> ArgMatches {
                         .long("dir")
                         .help("Inputs folder path to locus alignment")
                         .takes_value(true)
-                        .value_name("DIR"),
+                        .value_name("STRING"),
                 )
                 .arg(
                     Arg::with_name("opts-s")
@@ -65,8 +76,19 @@ fn get_args(version: &str) -> ArgMatches {
                         .help("Inputs params for IQ-TREE gene tree analyses")
                         .require_equals(true)
                         .takes_value(true)
-                        .value_name("PARAMS")
+                        .value_name("STRING")
                         .default_value("-T 1"),
+                )
+                .arg(
+                    Arg::with_name("input-fmt")
+                        .short("f")
+                        .long("input-fmt")
+                        .help("Sets input format")
+                        .required(true)
+                        .takes_value(true)
+                        .default_value("nexus")
+                        .possible_values(&["fasta", "phylip", "nexus"])
+                        .value_name("ALIGNMENT-FORMAT"),
                 ),
         )
         .subcommand(
@@ -82,7 +104,7 @@ fn get_args(version: &str) -> ArgMatches {
                                 .help("Inputs path to the ASTRAL jar file.")
                                 .takes_value(true)
                                 .required(true)
-                                .value_name("ASTRAL JAR"),
+                                .value_name("ASTRAL-JAR-PATH"),
                         ),
                 ),
         )
