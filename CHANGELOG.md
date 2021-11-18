@@ -1,5 +1,9 @@
 # Release Notes
 
+## v0.6.2
+
+- Fix version number errors (finally).
+
 ## v0.6.1
 
 - Fix version number errors.
