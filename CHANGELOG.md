@@ -3,7 +3,9 @@
 ## v0.6.0
 
 - Allow for checking dependencies issues.
+- Only run gene tree estimation for the gene tree subcommand.
 - More consistent terminal output.
+- Cleaner help messages
 
 ## v0.5.6
 

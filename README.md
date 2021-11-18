@@ -25,7 +25,7 @@ OS support:
 
 Dependencies:
 
-1. [IQ-TREE](http://www.iqtree.org/)
+1. [IQ-TREE2](http://www.iqtree.org/)
 2. [Astral](https://github.com/smirarab/ASTRAL) (optional)
 
 To check if the app can detect the dependencies:
@@ -76,6 +76,28 @@ SUBCOMMANDS:
 myte auto -d [alignment-folder]
 ```
 
+For species tree estimation, the default option will run IQ-TREE using this command:
+
+```Bash
+iqtree2 -s ../genes/ --prefix concat -T 1 -B 1000
+```
+
+You can specify the species tree command using option `opts-s=`
+
+For example
+
+```Bash
+myte auto -d genes/ opts-s="-T 4 -bnni -B 1000"
+```
+
+For gene tree estimation, the default option will run IQ-TREE using this command:
+
+```Bash
+iqtree2 -s [alignment-path] --prefix [gene-names] -T 1
+```
+
+Similar to species tree estimation, you can specify any parameters available for IQ-TREE using the `opts-g=` option in the app.
+
 ### Build gene trees from a directory of gene alignments
 
 The program will create multiple instances of IQ-TREE to run gene tree estimation in parallel. The program assess available cpu resources in your system and does it sensibly. In a simple word, it won't slow down your computer despite using all your cpu cores. Hence, it can be used on a personal computer without interferring your other work.
@@ -85,3 +107,5 @@ To generate gene trees:
 ```{Bash}
 myte gene -d [alignment-folder]
 ```
+
+You can also specify IQ-TREE parameters using `opts-g=` option.
