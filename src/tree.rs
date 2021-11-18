@@ -173,7 +173,7 @@ impl<'a> GeneTrees<'a> {
     fn print_genes_info<P: AsRef<Path>>(&self, path: &P, aln_size: usize) {
         log::info!("{:18}: {}", "Alignment path", path.as_ref().display());
         log::info!("{:18}: {}", "File counts", aln_size);
-        log::info!("{:18}: Iqtree", "Analyses");
+        log::info!("{:18}: IQ-TREE gene tree estimation", "Analyses");
         log::info!("{:18}: {}\n", "Executable", IQTREE_EXE);
     }
 
@@ -267,7 +267,7 @@ impl<'a> SpeciesTree<'a> {
     }
 
     fn print_species_info(&self) {
-        log::info!("{:18}: Species tree", "Analyses");
+        log::info!("{:18}: IQ-TREE species tree estimation", "Analyses");
         log::info!("{:18}: {}\n", "Executable", IQTREE_EXE);
     }
 
@@ -310,7 +310,10 @@ impl<'a> ConcordFactor<'a> {
     }
 
     fn print_concord_info(&self) {
-        log::info!("{:18}: Gene and site concordance factors", "Analyses");
+        log::info!(
+            "{:18}: IQ-TREE gene and site concordance factors",
+            "Analyses"
+        );
         log::info!("{:18}: {}\n", "Executable", IQTREE_EXE);
     }
 
@@ -351,7 +354,7 @@ impl<'a> MSCTree<'a> {
     }
 
     fn print_msc_info(&self) {
-        log::info!("{:18}: MSC", "Analyses");
+        log::info!("{:18}: Astral MSC", "Analyses");
         log::info!("{:18}: {}\n", "Executable", ASTRAL_EXE);
     }
 
@@ -378,7 +381,7 @@ impl<'a> Process<'a> {
         out.arg("-s").arg(self.path).arg("--prefix").arg(prefix);
         self.get_thread_num(&mut out);
         self.get_iqtree_params(&mut out);
-        out.output().expect("Failed to run IQ-Tree")
+        out.output().expect("Failed to run IQ-TREE")
     }
 
     fn run_iqtree_concord(&self, prefix: &str) -> Output {
@@ -397,7 +400,7 @@ impl<'a> Process<'a> {
             .arg("--prefix")
             .arg(prefix)
             .output()
-            .expect("Failed to run IQ-Tree concordance factors")
+            .expect("Failed to run IQ-TREE concordance factors")
     }
 
     fn run_astral(&self) -> Output {
