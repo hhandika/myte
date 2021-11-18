@@ -2,6 +2,8 @@
 
 ![myte-tests](https://github.com/hhandika/myte/workflows/myte-tests/badge.svg)
 [![Build Status](https://www.travis-ci.com/hhandika/myte.svg?branch=main)](https://www.travis-ci.com/hhandika/myte)
+![Crates-Io](https://img.shields.io/crates/v/myte)
+![GH-Release](https://img.shields.io/github/v/release/hhandika/myte)
 
 A tool for phylogenomic tree building. The program estimates species tree, gene trees, gene concordance factor, site concordance factor, and organize resulting files using a single command:
 
