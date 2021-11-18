@@ -178,7 +178,7 @@ impl<'a> GeneTrees<'a> {
     }
 
     fn create_tree_files_dir(&mut self) {
-        fs::create_dir_all(&self.treedir).expect("CANNOT CREATE DIRECTORY FOR TREE FILES");
+        fs::create_dir_all(&self.treedir).expect("Failed creating a directory for treefiles");
     }
 
     fn par_process_gene_trees(&mut self, paths: &[PathBuf]) {
@@ -204,10 +204,10 @@ impl<'a> GeneTrees<'a> {
             let ext = file.extension().unwrap().to_string_lossy();
             if ext == "treefile" {
                 let outdir = self.treedir.join(file);
-                fs::rename(file, outdir).expect("CANNOT MOVE IQ-TREE'S TREE FILE");
+                fs::rename(file, outdir).expect("Failed moving a treefile");
             } else {
                 let outdir = dir.join(file);
-                fs::rename(file, outdir).expect("CANNOT MOVE IQ-TREE'S RESULT FILES");
+                fs::rename(file, outdir).expect("Failed moving IQ-TREE files");
             }
         });
 
@@ -233,7 +233,7 @@ impl<'a> GeneTrees<'a> {
 
     fn write_trees<W: Write>(&self, treefile: &mut W, tree_path: &Path) {
         let mut content = String::new();
-        let mut tree = File::open(tree_path).expect("CANNOT ACCESS TREE FILE");
+        let mut tree = File::open(tree_path).expect("Failed accessing a treefile");
         tree.read_to_string(&mut content)
             .expect("CANNOT READ TREE FILES");
         writeln!(treefile, "{}", content.trim()).unwrap();
@@ -263,7 +263,7 @@ impl<'a> SpeciesTree<'a> {
         self.check_process_success(&out, self.path);
         let files = iqtree.get_iqtree_files(&self.prefix);
         self.organize_species_files(&files)
-            .expect("FAILED TO MOVE SPECIES TREE RESULT FILES");
+            .expect("Failed moving species tree files");
     }
 
     fn print_species_info(&self) {
@@ -277,7 +277,7 @@ impl<'a> SpeciesTree<'a> {
             let outdir = self.outdir.join(file);
             let ext = file.extension().unwrap().to_string_lossy();
             if ext != "treefile" {
-                fs::rename(file, outdir).expect("CANNOT MOVE IQ-TREE'S RESULT FILES");
+                fs::rename(file, outdir).expect("Failed moving IQ-TREE files");
             }
         });
 
@@ -306,7 +306,7 @@ impl<'a> ConcordFactor<'a> {
         self.check_process_success(&out, self.path);
         let files = iqtree.get_iqtree_files(&self.prefix);
         self.organize_cf_files(&files)
-            .expect("CANNOT MOVE CONCORDANCE FACTOR RESULT FILES");
+            .expect("Failed moving concordance factor files");
     }
 
     fn print_concord_info(&self) {
@@ -323,7 +323,7 @@ impl<'a> ConcordFactor<'a> {
             let outdir = self.outdir.join(file);
             let ext = file.extension().unwrap().to_string_lossy();
             if ext != "tre" {
-                fs::rename(file, outdir).expect("CANNOT MOVE IQ-TREE'S RESULT FILES");
+                fs::rename(file, outdir).expect("Failed moving IQ-TREE files");
             }
         });
 
@@ -359,7 +359,7 @@ impl<'a> MSCTree<'a> {
     }
 
     fn write_astral_output(&self, out: &Output) {
-        let mut asral_log = File::create(&self.astral_out).expect("CANNOT WRITE ASTRAL OUTPUT");
+        let mut asral_log = File::create(&self.astral_out).expect("Failed writing Astral log");
         write!(asral_log, "{}", str::from_utf8(&out.stderr).unwrap()).unwrap();
     }
 }

@@ -13,8 +13,8 @@ pub fn fix_astral_dependency(path: &str) {
     let jar_path = Path::new(path);
     let jar_full_path = jar_path
         .canonicalize()
-        .expect("CANNOT CREATE FULL PATH TO ASTRAL JAR FILE");
-    let mut file = File::create(&fname).expect("CANNOT CREATE AN ASTRAL EXECUTABLE");
+        .expect("Failed getting path to the Astral jar file");
+    let mut file = File::create(&fname).expect("Failed creating a file to solve astral dependency");
     writeln!(file, "#!/bin/bash").unwrap();
     writeln!(
         file,
@@ -22,7 +22,7 @@ pub fn fix_astral_dependency(path: &str) {
         jar_full_path.parent().unwrap().to_string_lossy(),
         jar_full_path.to_string_lossy()
     )
-    .expect("CANNOT WRITE ASTRAL EXECUTABLE");
+    .expect("Failed in writing an executable file for Astral");
 
     make_astral_executable(&fname);
 }
@@ -56,7 +56,7 @@ fn check_iqtree() {
                 .as_str();
             log::info!("{:18}: IQ-TREE v{}", "[OK]", version)
         }
-        Err(_) => log::info!("{:18}: {}", "\x1b[0;41m[NOT FOUND]\x1b[0m", "IQ-TREE"),
+        Err(_) => log::info!("{:18}: IQ-TREE", "[NOT FOUND]",),
     }
 }
 
