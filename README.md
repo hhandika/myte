@@ -5,7 +5,7 @@
 ![Crates-Io](https://img.shields.io/crates/v/myte)
 ![GH-Release](https://img.shields.io/github/v/release/hhandika/myte)
 
-A tool for phylogenomic tree building. The program estimates species tree, gene trees, gene concordance factor, site concordance factor, and organize resulting files using a single command:
+The app is a wrapper for IQ-TREE and Astral. It allows to estimate species tree, gene trees, gene and site concordance factors, MSC Astral trees, and to organize resulting files using a single command:
 
 ```{Bash}
 myte auto -d [gene-alignment-folder]
