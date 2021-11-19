@@ -84,7 +84,7 @@ For Astral installation, to solve the dependency, go to the folder where you ins
 myte deps astral -j [path-to-astral-jar-file]
 ```
 
-It will generate an executable file named `astral.sh`. Put the `astral.sh` file in a directory that is regiestered in your environment variable.
+It will generate an executable file named `astral.sh`. Put the `astral.sh` file in a directory that is registered in your environment variable.
 
 Try to check the dependencies again:
 
