@@ -14,7 +14,7 @@ myte auto -d [gene-alignment-folder]
 Similar functions can be achieved using a Bash script running GNU parallel. Our solution, however, carries some benefits:
 
 1. No coding skills needed. The app is a single executable command line app. The way it is designed omits the need to change the code.
-2. Allow for reproducibility. All changes in the app are tracked using git workflow. It also generate a log file when running.
+2. Reproducible. All code changes in the app are tracked using git. It also generates a log file when running.
 3. Flexible. The app lets users to specify the analysis parameters. The app design allows current and future parameters available in the IQ-TREE and Astral.
 4. Low overhead. It is written in a high-performance programming language with low ram and cpu usages.
 5. Safe parallel processing. It takes the advantages of the Rust programming language parallel computing algorithms that avoid data races.
@@ -29,9 +29,9 @@ The app does not yet support MPI. It is designed to run in a desktop computer an
 
 ## Installation
 
-`myte` is a single executable command line app. The executable file will be available in the release [link](https://github.com/hhandika/myte/releases). Copy it to the folder that is registered in your PATH variable.
+`myte` is a single executable command line app. The executable file will be available in the release [link](https://github.com/hhandika/myte/releases). Copy it to the folder that is registered in your PATH variable. For Linux users, if you encounter GLIBC erorrs when trying to run `myte`, try using the `ManyLinux` executable.
 
-You can also install the app using the Rust package manager cargo:
+You can also install the app using the Rust package manager [cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html):
 
 ```Bash
 cargo install myte
@@ -43,7 +43,7 @@ OS support:
 2. Linux
 3. Windows-WSL
 
->__Note__: We provide Apple Arm64 executable for MacOS. `myte` will run native on Apple Arm64 CPUs (M1 series). However, due to IQ-TREE suported CPU architecture limitation, IQ-TREE will run on the Apple Rosetta emulator.
+>__Attention ARM Mac Users!__: `myte` can run native on Apple Arm64 CPUs (M1 series). We provide Apple Arm64 executable for it in the release page. However, due to IQ-TREE limitation that only supports Intel-based MacOS, when myte interfaces with IQ-TREE, IQ-TREE will run on the Apple Rosetta emulator. In our test, all `myte` functions work on your default MacOS terminal running native on ARM architecture and interface well with IQ-TREE. There is no need to create a separate terminal that open using Rosetta.
 
 Dependencies:
 
@@ -56,7 +56,7 @@ To check if the app can detect the dependencies:
 myte check
 ```
 
-See [segul](https://github.com/hhandika/segul) readme for details instruction on how to install a command line application written in Rust.
+See [segul](https://github.com/hhandika/segul) readme for more detailed instruction on how to install a command line application written in Rust.
 
 ### Compile from source
 
@@ -78,7 +78,7 @@ Your executable will be available at `/target/release/myte`. Copy it to the fold
 
 The program detects `iqtree2` installation from the environment path variable. If the program fails to detect IQ-TREE, make sure the executable is called `iqtree2` (no spaces) and the directory where you put the IQ-TREE executable is registered to your environment path variable.
 
-For Astral installation, the app can help solve the Astral dependency. Go to the folder where you install Astral. Then, use this command to solve the dependency:
+For Astral installation, to solve the dependency, go to the folder where you install Astral. Then, use this command to solve it:
 
 ```Bash
 myte deps astral -j [path-to-astral-jar-file]
@@ -103,16 +103,16 @@ FLAGS:
     -V, --version    Prints version information
 
 SUBCOMMANDS:
-    auto     Auto estimate species tree, gene trees, and gene and site concordance factor
+    auto     Estimate species tree, gene trees, gene and site concordance factors, and MSC tree
     check    Check dependencies
     deps     Solves dependency issues
-    gene     Multi-core gene tree estimation using IQ-Tree
+    gene     Batch gene tree estimation using IQ-Tree
     help     Prints this message or the help of the given subcommand(s)
 ```
 
 ### Auto estimate species, gene trees and gene and site concordance factors
 
-This feature is particularly useful for running the analyses using a desktop computer. If you have access to a cluster computer, you could separately run species tree analyses, gene and site concordance factors, and Astral MSC phylogenetic estimation. Only use this program to run gene tree analyes in parallel ([see below](#estimate-gene-trees-from-a-directory-of-gene-alignments)).
+This feature is particularly useful for running the analyses using a desktop computer. If you have access to a cluster computer, it may be better to only use this program to run gene tree analyses in parallel ([see below](#estimate-gene-trees-from-a-directory-of-gene-alignments)) and run the rest of the analyses separately to reduce waiting time.
 
 ```{Bash}
 myte auto -d [alignment-folder]
