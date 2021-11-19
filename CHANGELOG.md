@@ -1,5 +1,10 @@
 # Release Notes
 
+## v0.6.3
+
+- Fix inconsistent app description.
+- Update help messages.
+
 ## v0.6.2
 
 - Fix version number errors (finally).
