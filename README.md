@@ -43,7 +43,7 @@ OS support:
 2. Linux
 3. Windows-WSL
 
->__Attention ARM Mac Users!__: `myte` can run native on Apple Arm64 CPUs (M1 series). We provide Apple Arm64 executable for it in the release page. However, due to IQ-TREE limitation that only supports Intel-based MacOS, when myte interfaces with IQ-TREE, IQ-TREE will run on the Apple Rosetta emulator. In our test, all `myte` functions work on your default MacOS terminal running native on ARM architecture and interface well with IQ-TREE. There is no need to create a separate terminal that open using Rosetta.
+>__Attention ARM Mac Users!__ `myte` can run native on Apple Arm64 CPUs (M1 series). We provide Apple Arm64 executable for it in the release page. However, due to IQ-TREE limitation that only supports Intel-based MacOS, when myte interfaces with IQ-TREE, IQ-TREE will run on the Apple Rosetta emulator. In our test, all `myte` functions work on your default MacOS terminal running native on ARM architecture and interface well with IQ-TREE. There is no need to create a separate terminal that open using Rosetta.
 
 Dependencies:
 
