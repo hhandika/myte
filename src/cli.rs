@@ -20,7 +20,7 @@ fn get_args(version: &str) -> ArgMatches {
         .subcommand(App::new("check").about("Check dependencies"))
         .subcommand(
             App::new("gene")
-                .about("Multi-core gene tree estimation using IQ-Tree")
+                .about("Batch gene tree estimation using IQ-Tree")
                 .arg(
                     Arg::with_name("dir")
                         .short("d")
@@ -52,7 +52,7 @@ fn get_args(version: &str) -> ArgMatches {
         .subcommand(
             App::new("auto")
                 .about(
-                    "Auto estimate species tree, gene trees, and gene and site concordance factors",
+                    "Estimate species tree, gene trees, gene and site concordance factors, and MSC tree",
                 )
                 .arg(
                     Arg::with_name("dir")
@@ -228,7 +228,7 @@ fn print_msc_tree_header(len: usize) {
 
 fn display_app_info(version: &str) {
     log::info!("{} v{}", crate_name!(), version);
-    log::info!("Genomics tools for phylogenetic tree estimation");
+    log::info!("{}", crate_description!());
     log::info!("Developed by Heru Handika\n");
     utils::get_system_info();
 }
