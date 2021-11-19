@@ -3,7 +3,7 @@ use std::io::Result;
 use crate::deps;
 use crate::tree::{self, InputFmt};
 use crate::utils;
-use clap::{crate_name, App, AppSettings, Arg, ArgMatches};
+use clap::{crate_description, crate_name, App, AppSettings, Arg, ArgMatches};
 
 use log::LevelFilter;
 use log4rs::append::console::ConsoleAppender;
@@ -12,9 +12,9 @@ use log4rs::config::{Appender, Config, Root};
 use log4rs::encode::pattern::PatternEncoder;
 
 fn get_args(version: &str) -> ArgMatches {
-    App::new("myte")
+    App::new(crate_name!())
         .version(version)
-        .about("A tool for phylogenomic tree building")
+        .about(crate_description!())
         .author("Heru Handika <hhandi1@lsu.edu>")
         .setting(AppSettings::SubcommandRequiredElseHelp)
         .subcommand(App::new("check").about("Check dependencies"))
