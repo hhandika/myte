@@ -57,7 +57,7 @@ fn check_iqtree() {
                 .as_str();
             log::info!("{:18}: IQ-TREE v{}", "[OK]", version)
         }
-        Err(_) => log::info!("{:18}: IQ-TREE", White.on(Red).paint("[NOT FOUND]")),
+        Err(_) => log::info!("{:18}: IQ-TREE", "[NOT FOUND]"),
     }
 }
 
@@ -66,6 +66,6 @@ fn check_astral() {
 
     match out {
         Ok(_) => log::info!("{:18}: ASTRAL", "[OK]"),
-        Err(_) => log::info!("{:18}: ASTRAL", White.on(Red).paint("[NOT FOUND]")),
+        Err(_) => log::info!("{:18}: ASTRAL", "[NOT FOUND]"),
     }
 }
