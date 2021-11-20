@@ -4,6 +4,7 @@ use std::path::Path;
 use std::process::Command;
 use std::str;
 
+use ansi_term::Colour::{Red, White, Yellow};
 use regex::Regex;
 
 use crate::tree::{ASTRAL_EXE, IQTREE_EXE};
@@ -28,7 +29,7 @@ pub fn fix_astral_dependency(path: &str) {
 }
 
 pub fn check_dependencies() {
-    log::info!("Dependencies:");
+    log::info!("{}", Yellow.paint("Dependencies"));
     check_iqtree();
     check_astral();
     println!();
@@ -56,7 +57,7 @@ fn check_iqtree() {
                 .as_str();
             log::info!("{:18}: IQ-TREE v{}", "[OK]", version)
         }
-        Err(_) => log::info!("{:18}: IQ-TREE", "[NOT FOUND]",),
+        Err(_) => log::info!("{:18}: IQ-TREE", White.on(Red).paint("[NOT FOUND]")),
     }
 }
 
@@ -65,6 +66,6 @@ fn check_astral() {
 
     match out {
         Ok(_) => log::info!("{:18}: ASTRAL", "[OK]"),
-        Err(_) => log::info!("{:18}: {}", "[NOT FOUND]", "ASTRAL"),
+        Err(_) => log::info!("{:18}: ASTRAL", White.on(Red).paint("[NOT FOUND]")),
     }
 }
