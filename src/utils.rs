@@ -1,4 +1,5 @@
 use std::io::{self, Result, Write};
+use std::iter;
 
 use ansi_term::Colour::Yellow;
 use chrono::{Local, NaiveTime};
@@ -128,9 +129,8 @@ impl PrettyDivider {
     }
 
     fn print_symbols<W: Write>(&self, io: &mut W) {
-        (0..=self.sym_len).for_each(|_| {
-            write!(io, "{}", self.sym).unwrap();
-        });
+        let sym: String = iter::repeat(self.sym).take(self.sym_len).collect();
+        write!(io, "{}", sym).unwrap();
     }
 }
 
