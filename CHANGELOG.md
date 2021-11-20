@@ -1,5 +1,10 @@
 # Release Notes
 
+## v0.6.4
+
+- Cleaner error messages.
+- Check dependency status before running the analyses.
+
 ## v0.6.3
 
 - Fix inconsistent app description.
