@@ -4,7 +4,7 @@ use std::path::Path;
 use std::process::Command;
 use std::str;
 
-use ansi_term::Colour::{Red, White, Yellow};
+use ansi_term::Colour::Yellow;
 use regex::Regex;
 
 use crate::tree::{ASTRAL_EXE, IQTREE_EXE};
