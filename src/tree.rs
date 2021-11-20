@@ -235,7 +235,7 @@ impl<'a> GeneTrees<'a> {
         let mut content = String::new();
         let mut tree = File::open(tree_path).expect("Failed accessing a treefile");
         tree.read_to_string(&mut content)
-            .expect("CANNOT READ TREE FILES");
+            .expect("Failed reading treefiles");
         writeln!(treefile, "{}", content.trim()).unwrap();
     }
 }
