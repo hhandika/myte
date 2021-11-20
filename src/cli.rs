@@ -117,10 +117,7 @@ pub fn parse_cli(version: &str) {
     match args.subcommand() {
         ("auto", Some(auto_matches)) => parse_auto_cli(auto_matches, &version),
         ("gene", Some(gene_matches)) => parse_gene_cli(gene_matches, &version),
-        ("check", Some(_)) => {
-            display_app_info(&version);
-            deps::check_dependencies();
-        }
+        ("check", Some(_)) => display_app_info(&version),
         ("deps", Some(deps_matches)) => parse_deps_cli(deps_matches),
         _ => unreachable!(),
     }
@@ -231,6 +228,7 @@ fn display_app_info(version: &str) {
     log::info!("{}", crate_description!());
     log::info!("Developed by Heru Handika\n");
     utils::get_system_info();
+    deps::check_dependencies();
 }
 
 fn print_complete() {
