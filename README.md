@@ -16,7 +16,7 @@ Similar functions can be achieved using a Bash script running GNU parallel. Our 
 1. No coding skills needed. The app is a single executable command line app. The way it is designed omits the need to change the code.
 2. Reproducible. All code changes in the app are tracked using git. It also generates a log file when running.
 3. Flexible. The app lets users to specify the analysis parameters. The app design allows current and future parameters available in the IQ-TREE and Astral.
-4. Low overhead. It is written in a high-performance programming language with low ram and cpu usages.
+4. Low footprint. It is written in a high-performance programming language with low ram and cpu usages.
 5. Safe parallel processing. It takes the advantages of the Rust programming language parallel computing algorithms that avoid data races.
 
 Limitation:
