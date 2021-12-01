@@ -25,7 +25,7 @@ pub fn print_divider(text: &str, len: usize) {
 }
 
 pub fn get_system_info() {
-    let sysinfo = sysinfo::System::new_all();
+    let sysinfo = System::new_all();
     let total_ram = sysinfo.get_total_memory();
     let gb = 1048576;
 
