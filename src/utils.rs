@@ -26,7 +26,7 @@ pub fn print_divider(text: &str, len: usize) {
 
 pub fn get_system_info() {
     let sysinfo = System::new_all();
-    let total_ram = sysinfo.get_total_memory();
+    let total_ram = sysinfo.total_memory();
     let gb = 1048576;
 
     log::info!("{}", Yellow.paint("System Information"));
@@ -50,21 +50,21 @@ pub fn get_system_info() {
 }
 
 fn get_os_name(sysinfo: &System) -> String {
-    match sysinfo.get_name() {
+    match sysinfo.name() {
         Some(i) => i,
         None => String::from("UNKNOWN"),
     }
 }
 
 fn get_os_version(sysinfo: &System) -> String {
-    match sysinfo.get_os_version() {
+    match sysinfo.os_version() {
         Some(i) => i,
         None => String::from(""),
     }
 }
 
 fn get_kernel_version(sysinfo: &System) -> String {
-    match sysinfo.get_kernel_version() {
+    match sysinfo.kernel_version() {
         Some(i) => i,
         None => String::from("UNKNOWN"),
     }

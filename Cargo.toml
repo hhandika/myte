@@ -21,7 +21,7 @@ log = "0.4.14"
 log4rs = "1.0.0"
 num_cpus = "1.13.*"
 rayon = "1.*"
-sysinfo = "0.16.*"
+sysinfo = "0.21.*"
 regex = "1.*"
 
 [profile.release]
