@@ -18,13 +18,13 @@ jobs:
             os: ubuntu-latest
             executable: myte
             artifact_name: target/release/myte
-            asset_name: myte-Linux-x86_64.tar.gz
+            asset_name: myte-Linux-x86_64.zip
 
           - name: macos
             os: macos-latest
             executable: myte
             artifact_name: target/release/myte
-            asset_name: myte-MacOS-x86_64.tar.gz
+            asset_name: myte-MacOS-x86_64.zip
 
     steps:
       - uses: actions/checkout@v1
